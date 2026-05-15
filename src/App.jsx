@@ -546,9 +546,16 @@ const researchers = rawResearchers.map((item) => {
   };
 });
 
-const odsOptions = [...new Set(researchers.flatMap((item) => item.ods_label))].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
-const techOptions = [...new Set(researchers.flatMap((item) => item.tecnologias))].sort((a, b) => a.localeCompare(b, "es"));
-const appOptions = [...new Set(researchers.flatMap((item) => item.aplicaciones_hospitalarias))].sort((a, b) => a.localeCompare(b, "es"));
+const odsOptions = [
+  "Todas",
+  ...new Set(researchers.flatMap((item) => item.ods_label || [])),
+].sort((a, b) => {
+  if (a === "Todas") return -1;
+  if (b === "Todas") return 1;
+  if (a === "No especificado") return 1;
+  if (b === "No especificado") return -1;
+  return a.localeCompare(b, "es", { numeric: true });
+});
 
 function Chip({ active, children, onClick }) {
   return (
@@ -738,25 +745,40 @@ function InterestModal({ researcher, onClose }) {
 }
 
 export default function App() {
-  const [selectedOds, setSelectedOds] = useState("Todos");
+  const [selectedOds, setSelectedOds] = useState("Todas");
   const [selectedTech, setSelectedTech] = useState("Todas");
-  const [selectedApp, setSelectedApp] = useState("Todas");
   const [selectedResearcher, setSelectedResearcher] = useState(null);
   const [interestResearcher, setInterestResearcher] = useState(null);
   const [query, setQuery] = useState("");
 
-  const availableTechs = useMemo(() => {
-    const base = selectedOds === "Todos" ? researchers : researchers.filter((item) => item.ods_label.includes(selectedOds));
-    return ["Todas", ...new Set(base.flatMap((item) => item.tecnologias))].sort((a, b) => a.localeCompare(b, "es"));
-  }, [selectedOds]);
+const availableTechs = useMemo(() => {
+const base =
+  selectedOds === "Todas"
+    ? researchers
+    : researchers.filter((item) => item.ods_label.includes(selectedOds));
 
-  const filteredResearchers = useMemo(() => researchers.filter((item) => {
+  return [
+    "Todas",
+    ...new Set(base.flatMap((item) => item.tecnologias)),
+  ];
+}, [selectedOds]);
+
+const filteredResearchers = useMemo(() => {
+  return researchers.filter((item) => {
     const content = `${item.nombre} ${item.area_estrategica} ${item.key_topics} ${item.research_interest}`.toLowerCase();
-    return (selectedOds === "Todos" || item.ods_label.includes(selectedOds)) &&
-      (selectedTech === "Todas" || item.tecnologias.includes(selectedTech)) &&
-      (selectedApp === "Todas" || item.aplicaciones_hospitalarias.includes(selectedApp)) &&
+
+    const matchOds =
+      selectedOds === "Todas" || item.ods_label.includes(selectedOds);
+
+    const matchTech =
+      selectedTech === "Todas" || item.tecnologias.includes(selectedTech);
+
+    const matchSearch =
       content.includes(query.toLowerCase());
-  }), [selectedOds, selectedTech, selectedApp, query]);
+
+    return matchOds && matchTech && matchSearch;
+  });
+}, [selectedOds, selectedTech, query]);
 
   const handleOds = (ods) => { setSelectedOds(ods); setSelectedTech("Todas"); };
 
@@ -783,7 +805,17 @@ export default function App() {
         <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <p className="mb-3 text-sm font-semibold text-slate-700">ODS</p>
 
-          <div className="flex flex-wrap gap-2">{["Todas", ...appOptions].map((app) => <Chip key={app} active={selectedApp === app} onClick={() => setSelectedApp(app)}>{app}</Chip>)}</div>
+          <div className="flex flex-wrap gap-2">
+  {odsOptions.map((ods) => (
+    <Chip
+      key={ods}
+      active={selectedOds === ods}
+      onClick={() => handleOds(ods)}
+    >
+      {ods}
+    </Chip>
+  ))}
+</div>
           <p className="mb-3 mt-6 text-sm font-semibold text-slate-700">Tecnologías y líneas</p>
           <div className="flex max-h-40 flex-wrap gap-2 overflow-auto pr-2">{availableTechs.map((tech) => <Chip key={tech} active={selectedTech === tech} onClick={() => setSelectedTech(tech)}>{tech}</Chip>)}</div>
         </div>
