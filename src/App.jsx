@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Search, ExternalLink, Mail, ArrowLeft, HeartHandshake, Filter, Building2 } from "lucide-react";
+import { Search, ExternalLink, ArrowLeft, HeartHandshake, Filter, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "./supabaseClient";
 
 const COLORS = {
   primary: "#003B82",
@@ -10,75 +11,6 @@ const COLORS = {
   text: "#0F172A",
   muted: "#475569",
 };
-
-const KEY_INTEREST_OPTIONS = [
-  "Inteligencia Artificial y Analítica de Datos",
-  "Ciberseguridad y Protección de Datos",
-  "Ingeniería Biomédica y Tecnologías para la Salud",
-  "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-  "Agua, Medio Ambiente y Salud Pública Ambiental",
-  "Agricultura Inteligente, Agroecología e Inocuidad",
-  "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-  "Psicología, Salud Mental y Bienestar Social",
-  "Movilidad Sostenible y Ciudades Inteligentes",
-  "Materiales, Manufactura e Infraestructura",
-  "Gestión Empresarial, Economía y Desarrollo Productivo",
-];
-
-
-
-function normalizeText(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-function inferKeyInterest(item) {
-  const text = normalizeText(`${item.key_topics} ${item.research_interest}`);
-  const interests = [];
-
-if (/inteligencia artificial|machine learning|deep learning|ia|nlp|llm|datos|analitica|analisis de datos|software|chatbot|transformer|mineria|vision artificial|modelos de lenguaje|redes neuronales/.test(text)) {
-  interests.push("Inteligencia Artificial y Analítica de Datos");
-}
-
-if (/ciberseguridad|seguridad informatica|proteccion de datos|privacidad|auditoria regulatoria|antidelitos|ciberterrorismo|intrusos|contrasenas|delitos informaticos/.test(text)) {
-  interests.push("Ciberseguridad y Protección de Datos");
-}
-
-
-  if (/biomedic|salud|medic|clinica|diagnostic|protesis|sensor medic|rehabilit|neuro|eeg|bci|implante|odontolog|biosenal|tomografia|cancer/.test(text)) {
-    interests.push("Ingeniería Biomédica, Salud, Prótesis y Sensores Médicos");
-  }
-
-if (/telecomunic|iot|electronica|redes|inalambric|lora|lorawan|uwb|radiofrecuencia|antena|edge|fog|esp32|sensores/.test(text)) {
-  interests.push("Telecomunicaciones, IoT, Electrónica y Redes");
-}
-
-
-  if (/agricultura|agua|ambiente|medio ambiente|pesticida|hidric|microplastico|sustentable|sostenible|clima|ecosistema|cultivo|agro/.test(text)) {
-    interests.push("Agricultura Inteligente, Medio Ambiente y Agua");
-  }
-
-  if (/educacion|pedagog|inclusion|psicolog|bienestar|salud mental|violencia|demencia|autismo|discapacidad|social/.test(text)) {
-    interests.push("Educación Inclusiva, Psicología y Bienestar Social");
-  }
-
-  if (/movilidad|ciudad|smart city|smart cities|transporte|urbana|gps|flota|vehiculo|conduccion|emisiones/.test(text)) {
-    interests.push("Movilidad Sostenible y Ciudades Inteligentes (Smart Cities)");
-  }
-
-  if (/material|construccion|manufactura|impresion 3d|cad|cam|resina|polimero|compuesto|fractura|estructura|fem|cemento|ceram/.test(text)) {
-    interests.push("Ingeniería de Materiales, Construcción y Manufactura");
-  }
-
-  if (/gestion|empresa|economia|pymes|pyme|emprendedor|productiv|financier|turismo|calidad|qfd|organizacional/.test(text)) {
-    interests.push("Gestión Empresarial, Economía y Pymes");
-  }
-
-  return interests.length ? interests : ["Gestión Empresarial, Economía y Pymes"];
-}
-
 
 const rawResearchers = [
   {
@@ -341,7 +273,7 @@ const rawResearchers = [
   {
     "id": "20",
     "nombre": "Jorge Isaac Fajardo Seminario",
-    "url_photo": "https://pure.ups.edu.ec/files-asset/26410620/fajardo_seminario_jorge_isaac.png?w=320&f=webp",
+    "url_photo": "https://pure.ups.edu.ec/en/persons/jorge-isaac-fajardo-seminario-3/",
     "url": "https://pure.ups.edu.ec/en/persons/jorge-isaac-fajardo-seminario-3/",
     "research_interest": "Realiza ensayos físicos que correlacionan resinas sostenibles y técnicas complejas de conformado de materiales termomecánicos Compara coronas, mallas o implantes cerámicos creados en polímeros mediante tecnologías CNC / Impresión 3D, evaluando la resistencia mecánica post-envejecimiento por ciclos térmicos y la microdureza Desarrolla también alternativas limpias con fibras vegetales de guadua integradas en polímeros por extrusión, apoyando las tecnologías y biorrefinerías en base a descartes agro-biológicos en pro del sector automotriz o ingenieril",
     "key_topics": "Materiales Odontológicos Impresos en 3D (CAD/CAM)",
@@ -601,197 +533,23 @@ function inferApplications(text) {
   return [...new Set(apps)].slice(0, 4);
 }
 
-function inferOds(item) {
-  const name = item.nombre.toLowerCase();
-
-  if (name.includes("adrian eugenio ñauta")) {
-    return ["8", "9", "12"];
-  }
-
-  if (name.includes("diego rene urgiles") || name.includes("diego rené urgiles")) {
-    return ["7", "9", "11", "13"];
-  }
-
-  if (name.includes("jonnathan dario santos") || name.includes("jonnathan darío santos")) {
-    return ["9", "11", "12"];
-  }
-
-  return item.sdg;
-}
-
-const KEY_INTEREST_BY_ID = {
-  "1": [
-    "Gestión Empresarial, Economía y Desarrollo Productivo",
-  ],
-  "2": [
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-    "Inteligencia Artificial y Analítica de Datos",
-  ],
-  "3": [
-    "Movilidad Sostenible y Ciudades Inteligentes",
-    "Inteligencia Artificial y Analítica de Datos",
-  ],
-  "4": [
-    "Psicología, Salud Mental y Bienestar Social",
-  ],
-  "5": [
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "6": [
-    "Agua, Medio Ambiente y Salud Pública Ambiental",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-  "7": [
-    "Materiales, Manufactura e Infraestructura",
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "8": [
-    "Inteligencia Artificial y Analítica de Datos",
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "9": [
-    "Inteligencia Artificial y Analítica de Datos",
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-  ],
-  "10": [
-    "Psicología, Salud Mental y Bienestar Social",
-    "Gestión Empresarial, Economía y Desarrollo Productivo",
-  ],
-  "11": [
-    "Materiales, Manufactura e Infraestructura",
-    "Movilidad Sostenible y Ciudades Inteligentes",
-  ],
-  "12": [
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-    "Materiales, Manufactura e Infraestructura",
-  ],
-  "13": [
-    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-    "Movilidad Sostenible y Ciudades Inteligentes",
-  ],
-  "14": [
-    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "15": [
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "16": [
-    "Inteligencia Artificial y Analítica de Datos",
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "17": [
-    "Psicología, Salud Mental y Bienestar Social",
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-  ],
-  "18": [
-    "Materiales, Manufactura e Infraestructura",
-  ],
-  "19": [
-    "Inteligencia Artificial y Analítica de Datos",
-    "Movilidad Sostenible y Ciudades Inteligentes",
-    "Gestión Empresarial, Economía y Desarrollo Productivo",
-  ],
-  "20": [
-    "Materiales, Manufactura e Infraestructura",
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-  ],
-  "21": [
-    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-  ],
-  "22": [
-    "Gestión Empresarial, Economía y Desarrollo Productivo",
-  ],
-  "23": [
-    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-  "24": [
-    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-  ],
-  "25": [
-    "Gestión Empresarial, Economía y Desarrollo Productivo",
-    "Agua, Medio Ambiente y Salud Pública Ambiental",
-  ],
-  "26": [
-    "Ciberseguridad y Protección de Datos",
-  ],
-  "27": [
-    "Agua, Medio Ambiente y Salud Pública Ambiental",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-  "28": [
-    "Movilidad Sostenible y Ciudades Inteligentes",
-  ],
-  "29": [
-    "Agua, Medio Ambiente y Salud Pública Ambiental",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-  "30": [
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-    "Inteligencia Artificial y Analítica de Datos",
-  ],
-  "31": [
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-  "32": [
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-    "Psicología, Salud Mental y Bienestar Social",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-  "33": [
-    "Gestión Empresarial, Economía y Desarrollo Productivo",
-  ],
-  "34": [
-    "Ingeniería Biomédica y Tecnologías para la Salud",
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-  ],
-  "35": [
-    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
-    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
-    "Agricultura Inteligente, Agroecología e Inocuidad",
-  ],
-};
-
-
 const researchers = rawResearchers.map((item) => {
   const tecnologias = splitTopics(item.key_topics);
   const aplicaciones = inferApplications(`${item.research_interest} ${item.key_topics}`);
-  const keyInterest = KEY_INTEREST_BY_ID[item.id] || [];
-  const ods = inferOds(item);
-
   return {
     ...item,
-    ods,
-    ods_label: ods.map((s) => `ODS ${s}`),
-    ods_inferidos: item.sdg.includes("No especificado"),
-    key_interest: keyInterest,
+    ods_label: item.sdg.map((s) => (s === "No especificado" ? s : `ODS ${s}`)),
     tecnologias,
     tecnologias_resumidas: tecnologias.slice(0, 4),
     perfil_resumido: summarize(item.research_interest),
-    area_estrategica: keyInterest[0] || "Capacidad científica",
-    aplicaciones_hospitalarias: aplicaciones.length
-      ? aplicaciones
-      : ["Exploración de colaboración interdisciplinaria"],
+    area_estrategica: tecnologias[0] || "Capacidad científica",
+    aplicaciones_hospitalarias: aplicaciones.length ? aplicaciones : ["Exploración de colaboración interdisciplinaria"],
   };
 });
 
-
-const odsOptions = [
-  "Todas",
-  ...new Set(researchers.flatMap((item) => item.ods_label || [])),
-].sort((a, b) => {
-  if (a === "Todas") return -1;
-  if (b === "Todas") return 1;
-  if (a === "No especificado") return 1;
-  if (b === "No especificado") return -1;
-  return a.localeCompare(b, "es", { numeric: true });
-});
+const odsOptions = [...new Set(researchers.flatMap((item) => item.ods_label))].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+const techOptions = [...new Set(researchers.flatMap((item) => item.tecnologias))].sort((a, b) => a.localeCompare(b, "es"));
+const appOptions = [...new Set(researchers.flatMap((item) => item.aplicaciones_hospitalarias))].sort((a, b) => a.localeCompare(b, "es"));
 
 function Chip({ active, children, onClick }) {
   return (
@@ -895,17 +653,9 @@ function CatalogCard({ item, onOpen }) {
         <div className="mb-3 flex flex-wrap gap-2">
           {item.aplicaciones_hospitalarias.slice(0, 2).map((app) => <span key={app} className="rounded-full px-3 py-1 text-xs" style={{ backgroundColor: COLORS.light, color: COLORS.primary }}>{app}</span>)}
         </div>
-<div className="flex flex-wrap gap-2">
-  {item.key_interest.slice(0, 2).map((interest) => (
-    <span
-      key={interest}
-      className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
-    >
-      {interest}
-    </span>
-  ))}
-</div>
-
+        <div className="flex flex-wrap gap-2">
+          {item.tecnologias_resumidas.map((tech) => <span key={tech} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{tech}</span>)}
+        </div>
         <button onClick={() => onOpen(item)} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white transition group-hover:shadow-md" style={{ backgroundColor: COLORS.primary }}>Ver perfil</button>
       </div>
     </article>
@@ -922,16 +672,7 @@ function Profile({ selected, onBack, onCollaborate }) {
           <h2 className="mt-6 text-3xl font-semibold" style={{ color: COLORS.text }}>{selected.nombre}</h2>
           <p className="mt-2" style={{ color: COLORS.primary }}>{selected.area_estrategica}</p>
           <div className="mt-6 flex flex-wrap gap-2">
-            {selected.ods_label.map((ods) => (
-  <span
-    key={ods}
-    className="rounded-full px-3 py-1 text-sm"
-    style={{ backgroundColor: COLORS.light, color: COLORS.primary }}
-  >
-    {ods}{selected.ods_inferidos ? " inferido" : ""}
-  </span>
-))}
-
+            {selected.ods_label.map((ods) => <span key={ods} className="rounded-full px-3 py-1 text-sm" style={{ backgroundColor: COLORS.light, color: COLORS.primary }}>{ods}</span>)}
           </div>
           <a href={selected.url} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-sm font-medium" style={{ color: COLORS.primary }}>Ver perfil PURE <ExternalLink size={16} /></a>
         </aside>
@@ -952,26 +693,12 @@ function Profile({ selected, onBack, onCollaborate }) {
             <p className="mt-3 leading-8" style={{ color: COLORS.muted }}>{selected.research_interest}</p>
           </div>
 
-<div className="mt-8">
-  <p
-    className="text-sm font-semibold uppercase tracking-wide"
-    style={{ color: COLORS.muted }}
-  >
-    Temas específicos de investigación
-  </p>
-
-  <div className="mt-3 flex flex-wrap gap-2">
-    {(selected.tecnologias || []).map((topic) => (
-      <span
-        key={topic}
-        className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700"
-      >
-        {topic}
-      </span>
-    ))}
-  </div>
-</div>
-
+          <div className="mt-8">
+            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: COLORS.muted }}>Tecnologías y líneas de investigación</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {selected.tecnologias.map((tech) => <span key={tech} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700">{tech}</span>)}
+            </div>
+          </div>
 
           <button onClick={() => onCollaborate(selected)} className="mt-10 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}><HeartHandshake size={18} /> Registrar interés de colaboración</button>
         </main>
@@ -981,7 +708,50 @@ function Profile({ selected, onBack, onCollaborate }) {
 }
 
 function InterestModal({ researcher, onClose }) {
+  const [form, setForm] = useState({
+    contact_name: "",
+    contact_role: "",
+    contact_email: "",
+    interest_level: "Exploratorio",
+    comment: "",
+  });
+  const [status, setStatus] = useState("idle");
+
   if (!researcher) return null;
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!supabase) {
+      setStatus("config-error");
+      return;
+    }
+
+    setStatus("saving");
+
+    const { error } = await supabase.from("collaboration_interest").insert({
+      ...form,
+      researcher_id: researcher.id,
+      researcher_name: researcher.nombre,
+      researcher_payload: {
+        id: researcher.id,
+        nombre: researcher.nombre,
+        url: researcher.url,
+        ods_label: researcher.ods_label,
+        key_interest: researcher.key_interest,
+        key_topics: researcher.key_topics,
+      },
+    });
+
+    if (error) {
+      console.error(error);
+      setStatus("error");
+      return;
+    }
+
+    setStatus("success");
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
@@ -992,66 +762,173 @@ function InterestModal({ researcher, onClose }) {
           </div>
           <button onClick={onClose} className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">Cerrar</button>
         </div>
-        <form className="mt-6 grid gap-4 md:grid-cols-2">
-          <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Nombre de la persona interesada" />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Cargo o área hospitalaria" />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Correo" type="email" />
+        <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
+          <input required value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Nombre de la persona interesada" />
+          <input value={form.contact_role} onChange={(e) => setForm({ ...form, contact_role: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Cargo o área hospitalaria" />
+          <input required value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Correo" type="email" />
           <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none" value={researcher.nombre} readOnly />
-          <select className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2"><option>Nivel de interés</option><option>Exploratorio</option><option>Alto</option><option>Prioritario</option></select>
-          <textarea className="min-h-32 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2" placeholder="Comentario o necesidad detectada" />
-          <button type="button" className="rounded-2xl px-5 py-3 text-sm font-semibold text-white md:col-span-2" style={{ backgroundColor: COLORS.primary }}>Enviar registro</button>
+          <select value={form.interest_level} onChange={(e) => setForm({ ...form, interest_level: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2"><option>Exploratorio</option><option>Alto</option><option>Prioritario</option></select>
+          <textarea required value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} className="min-h-32 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2" placeholder="Comentario o necesidad detectada" />
+          <button disabled={status === "saving" || status === "success"} type="submit" className="rounded-2xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-70 md:col-span-2" style={{ backgroundColor: COLORS.primary }}>{status === "saving" ? "Enviando..." : status === "success" ? "Registro enviado" : "Enviar registro"}</button>
+          {status === "config-error" && <p className="text-sm text-red-600 md:col-span-2">Faltan las variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.</p>}
+          {status === "error" && <p className="text-sm text-red-600 md:col-span-2">No se pudo enviar. Revise la configuración de Supabase.</p>}
+          {status === "success" && <p className="text-sm font-medium text-emerald-700 md:col-span-2">La respuesta quedó guardada correctamente.</p>}
         </form>
       </motion.div>
     </div>
   );
 }
 
+function PrioritySelection({ researchers }) {
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [query, setQuery] = useState("");
+  const [form, setForm] = useState({
+    organization: "",
+    contact_name: "",
+    contact_email: "",
+    comment: "",
+  });
+  const [status, setStatus] = useState("idle");
+  const maxSelections = 5;
+
+  const filteredResearchers = useMemo(() => {
+    return researchers.filter((item) => {
+      const content = `${item.nombre} ${item.area_estrategica} ${item.key_interest?.join(" ")} ${item.key_topics}`.toLowerCase();
+      return content.includes(query.toLowerCase());
+    });
+  }, [query, researchers]);
+
+  const selectedResearchers = useMemo(() => {
+    return researchers.filter((item) => selectedIds.includes(item.id));
+  }, [researchers, selectedIds]);
+
+  const toggleSelection = (id) => {
+    setSelectedIds((current) => {
+      if (current.includes(id)) return current.filter((itemId) => itemId !== id);
+      if (current.length >= maxSelections) {
+        alert(`Puede seleccionar hasta ${maxSelections} investigadores.`);
+        return current;
+      }
+      return [...current, id];
+    });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (selectedResearchers.length === 0) {
+      alert("Seleccione al menos un investigador.");
+      return;
+    }
+
+    if (!supabase) {
+      setStatus("config-error");
+      return;
+    }
+
+    setStatus("saving");
+
+    const { error } = await supabase.from("priority_selections").insert({
+      ...form,
+      selected_count: selectedResearchers.length,
+      selected_researchers: selectedResearchers.map((item) => ({
+        id: item.id,
+        nombre: item.nombre,
+        url: item.url,
+        ods_label: item.ods_label,
+        key_interest: item.key_interest,
+        key_topics: item.key_topics,
+      })),
+    });
+
+    if (error) {
+      console.error(error);
+      setStatus("error");
+      return;
+    }
+
+    setStatus("success");
+    setSelectedIds([]);
+    setForm({ organization: "", contact_name: "", contact_email: "", comment: "" });
+  };
+
+  return (
+    <footer className="mx-auto max-w-7xl px-6 pb-10">
+      <form onSubmit={handleSubmit} className="rounded-3xl px-6 py-8 text-white" style={{ backgroundColor: COLORS.dark }}>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+            <div>
+              <h3 className="text-2xl font-semibold">Selección de investigadores prioritarios</h3>
+              <p className="mt-2 text-blue-100">Seleccione hasta {maxSelections} perfiles y envíe la respuesta directamente desde la plataforma.</p>
+              <p className="mt-3 text-sm font-semibold">{selectedIds.length} / {maxSelections} seleccionados</p>
+            </div>
+
+            <div className="relative w-full lg:w-96">
+              <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar investigador o área" className="w-full rounded-2xl border border-white/20 bg-white py-3 pl-11 pr-4 text-slate-900 outline-none" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <input required value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="Institución / empresa" className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
+            <input required value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} placeholder="Nombre de contacto" className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
+            <input required type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="Correo" className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
+          </div>
+
+          <textarea value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Comentario general o necesidad prioritaria" className="min-h-24 rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
+
+          <div className="max-h-[520px] overflow-auto pr-2">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredResearchers.map((item) => {
+                const checked = selectedIds.includes(item.id);
+                return (
+                  <label key={item.id} className={`flex cursor-pointer items-start gap-4 rounded-2xl p-4 transition ${checked ? "bg-white text-slate-900" : "bg-white/10 hover:bg-white/20"}`}>
+                    <input type="checkbox" checked={checked} onChange={() => toggleSelection(item.id)} className="mt-1 h-5 w-5 rounded border-white/30" />
+                    <div>
+                      <p className={checked ? "font-semibold text-slate-900" : "font-semibold text-white"}>{item.nombre}</p>
+                      <p className={checked ? "mt-1 text-sm text-slate-600" : "mt-1 text-sm text-blue-100"}>{(item.key_interest || [item.area_estrategica]).slice(0, 2).join(" | ")}</p>
+                      <p className={checked ? "mt-2 text-xs text-slate-500" : "mt-2 text-xs text-blue-100"}>{(item.ods_label || []).join(", ")}</p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <button disabled={status === "saving" || status === "success"} className="w-fit rounded-full bg-white px-6 py-3 text-sm font-semibold disabled:opacity-70" style={{ color: COLORS.primary }}>
+            {status === "saving" ? "Enviando..." : status === "success" ? "Selección enviada" : "Enviar selección"}
+          </button>
+          {status === "config-error" && <p className="text-sm text-red-200">Faltan las variables VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.</p>}
+          {status === "error" && <p className="text-sm text-red-200">No se pudo guardar la selección. Revise la tabla y las políticas de Supabase.</p>}
+          {status === "success" && <p className="text-sm font-medium text-emerald-200">Respuesta guardada. Gracias.</p>}
+        </div>
+      </form>
+    </footer>
+  );
+}
+
 export default function App() {
-  const [selectedOds, setSelectedOds] = useState("Todas");
-  const [selectedKeyInterest, setSelectedKeyInterest] = useState("Todas");
+  const [selectedOds, setSelectedOds] = useState("Todos");
+  const [selectedTech, setSelectedTech] = useState("Todas");
+  const [selectedApp, setSelectedApp] = useState("Todas");
   const [selectedResearcher, setSelectedResearcher] = useState(null);
   const [interestResearcher, setInterestResearcher] = useState(null);
   const [query, setQuery] = useState("");
 
-const availableKeyInterests = useMemo(() => {
-  const base =
-    selectedOds === "Todas"
-      ? researchers
-      : researchers.filter((item) => item.ods_label.includes(selectedOds));
+  const availableTechs = useMemo(() => {
+    const base = selectedOds === "Todos" ? researchers : researchers.filter((item) => item.ods_label.includes(selectedOds));
+    return ["Todas", ...new Set(base.flatMap((item) => item.tecnologias))].sort((a, b) => a.localeCompare(b, "es"));
+  }, [selectedOds]);
 
-  return [
-    "Todas",
-    ...KEY_INTEREST_OPTIONS.filter((interest) =>
-      base.some((item) => item.key_interest.includes(interest))
-    ),
-  ];
-}, [selectedOds]);
+  const filteredResearchers = useMemo(() => researchers.filter((item) => {
+    const content = `${item.nombre} ${item.area_estrategica} ${item.key_topics} ${item.research_interest}`.toLowerCase();
+    return (selectedOds === "Todos" || item.ods_label.includes(selectedOds)) &&
+      (selectedTech === "Todas" || item.tecnologias.includes(selectedTech)) &&
+      (selectedApp === "Todas" || item.aplicaciones_hospitalarias.includes(selectedApp)) &&
+      content.includes(query.toLowerCase());
+  }), [selectedOds, selectedTech, selectedApp, query]);
 
-
-const filteredResearchers = useMemo(() => {
-  return researchers.filter((item) => {
-    const content = normalizeText(
-      `${item.nombre} ${item.area_estrategica} ${item.key_interest.join(" ")} ${item.key_topics} ${item.research_interest}`
-    );
-
-    const matchOds =
-      selectedOds === "Todas" || item.ods_label.includes(selectedOds);
-
-    const matchKeyInterest =
-      selectedKeyInterest === "Todas" ||
-      item.key_interest.includes(selectedKeyInterest);
-
-    const matchSearch = content.includes(normalizeText(query));
-
-    return matchOds && matchKeyInterest && matchSearch;
-  });
-}, [selectedOds, selectedKeyInterest, query]);
-
-
-const handleOds = (ods) => {
-  setSelectedOds(ods);
-  setSelectedKeyInterest("Todas");
-};
+  const handleOds = (ods) => { setSelectedOds(ods); setSelectedTech("Todas"); };
 
   if (selectedResearcher) {
     return <main style={{ backgroundColor: COLORS.bg, minHeight: "100vh" }}><Profile selected={selectedResearcher} onBack={() => setSelectedResearcher(null)} onCollaborate={setInterestResearcher} /><InterestModal researcher={interestResearcher} onClose={() => setInterestResearcher(null)} /></main>;
@@ -1075,86 +952,18 @@ const handleOds = (ods) => {
 
         <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <p className="mb-3 text-sm font-semibold text-slate-700">ODS</p>
-
-          <div className="flex flex-wrap gap-2">
-  {odsOptions.map((ods) => (
-    <Chip
-      key={ods}
-      active={selectedOds === ods}
-      onClick={() => handleOds(ods)}
-    >
-      {ods}
-    </Chip>
-  ))}
-</div>
-<p className="mb-3 mt-6 text-sm font-semibold text-slate-700">Áreas estratégicas</p>
-<div className="flex max-h-40 flex-wrap gap-2 overflow-auto pr-2">
-  {availableKeyInterests.map((interest) => (
-    <Chip
-      key={interest}
-      active={selectedKeyInterest === interest}
-      onClick={() => setSelectedKeyInterest(interest)}
-    >
-      {interest}
-    </Chip>
-  ))}
-</div>
+          <div className="flex flex-wrap gap-2">{["Todos", ...odsOptions].map((ods) => <Chip key={ods} active={selectedOds === ods} onClick={() => handleOds(ods)}>{ods}</Chip>)}</div>
+          <p className="mb-3 mt-6 text-sm font-semibold text-slate-700">Aplicación hospitalaria</p>
+          <div className="flex flex-wrap gap-2">{["Todas", ...appOptions].map((app) => <Chip key={app} active={selectedApp === app} onClick={() => setSelectedApp(app)}>{app}</Chip>)}</div>
+          <p className="mb-3 mt-6 text-sm font-semibold text-slate-700">Tecnologías y líneas</p>
+          <div className="flex max-h-40 flex-wrap gap-2 overflow-auto pr-2">{availableTechs.map((tech) => <Chip key={tech} active={selectedTech === tech} onClick={() => setSelectedTech(tech)}>{tech}</Chip>)}</div>
         </div>
 
         <div className="mt-6 text-sm" style={{ color: COLORS.muted }}>{filteredResearchers.length} perfiles encontrados</div>
         <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{filteredResearchers.map((item) => <CatalogCard key={item.id} item={item} onOpen={setSelectedResearcher} />)}</div>
         {filteredResearchers.length === 0 && <div className="mt-8 rounded-3xl bg-white p-10 text-center ring-1 ring-slate-200"><p className="text-lg font-medium" style={{ color: COLORS.text }}>No se encontraron perfiles con esos filtros.</p><p className="mt-2" style={{ color: COLORS.muted }}>Pruebe con otro ODS, tecnología o palabra clave.</p></div>}
       </section>
-<footer className="mx-auto max-w-7xl px-6 pb-10">
-  <div
-    className="rounded-3xl px-6 py-8 text-white"
-    style={{ backgroundColor: COLORS.dark }}
-  >
-    <div className="flex flex-col gap-6">
-      <div>
-        <h3 className="text-2xl font-semibold">
-          Selección de investigadores prioritarios
-        </h3>
-
-        <p className="mt-2 text-blue-100">
-          Marque los perfiles con mayor potencial de colaboración para el
-          Hospital José Carrasco Arteaga.
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {researchers.slice(0, 6).map((item) => (
-          <label
-            key={item.id}
-            className="flex items-start gap-4 rounded-2xl bg-white/10 p-4 transition hover:bg-white/20"
-          >
-            <input
-              type="checkbox"
-              className="mt-1 h-5 w-5 rounded border-white/30"
-            />
-
-            <div>
-              <p className="font-semibold text-white">
-                {item.nombre}
-              </p>
-
-              <p className="mt-1 text-sm text-blue-100">
-                {item.area_estrategica}
-              </p>
-            </div>
-          </label>
-        ))}
-      </div>
-
-      <button
-        className="w-fit rounded-full bg-white px-6 py-3 text-sm font-semibold"
-        style={{ color: COLORS.primary }}
-      >
-        Registrar selección
-      </button>
-    </div>
-  </div>
-</footer>
+      <PrioritySelection researchers={researchers} />
     </main>
   );
 }
