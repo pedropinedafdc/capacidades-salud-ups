@@ -579,21 +579,16 @@ function Header({ onExplore }) {
       <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
       <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="mb-16 flex items-center justify-between">
-          <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
-            <img
+       <div className="mb-16">
+  <div className="flex w-full items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm">
+     <img
               src="/logo-ups.png"
               alt="Universidad Politécnica Salesiana"
               className="h-14 w-auto object-contain"
             />
-
             <div>
-              <p className="text-sm font-semibold leading-none" style={{ color: COLORS.primary }}>
-                Universidad Politécnica Salesiana
-              </p>
-              <p className="mt-1 text-xs" style={{ color: COLORS.muted }}>
-                Secretaría Técnica de Ecosistema de Emprendimiento e Innovación
-              </p>
+
+
             </div>
           </div>
         </div>
