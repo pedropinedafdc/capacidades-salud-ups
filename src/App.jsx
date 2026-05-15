@@ -3,6 +3,7 @@ import { Search, ExternalLink, Mail, ArrowLeft, HeartHandshake, Filter, Building
 import { motion } from "framer-motion";
 import { supabase } from "./supabaseClient";
 
+
 const COLORS = {
   primary: "#003B82",
   dark: "#001F5B",
@@ -1007,7 +1008,6 @@ function InterestModal({ researcher, onClose }) {
   );
 }
 
-
 function PrioritySelectionForm({ researchers }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [query, setQuery] = useState("");
@@ -1023,12 +1023,14 @@ function PrioritySelectionForm({ researchers }) {
 
   const filteredResearchers = useMemo(() => {
     return researchers.filter((item) => {
-      const content = normalizeText([
-        item.nombre,
-        item.area_estrategica,
-        item.key_interest.join(" "),
-        item.key_topics,
-      ].join(" "));
+      const content = normalizeText(
+        [
+          item.nombre,
+          item.area_estrategica,
+          item.key_interest.join(" "),
+          item.key_topics,
+        ].join(" ")
+      );
 
       return content.includes(normalizeText(query));
     });
@@ -1086,55 +1088,157 @@ function PrioritySelectionForm({ researchers }) {
       })),
     };
 
-    const { error } = await supabase.from("priority_selections").insert(payload);
+    const { error } = await supabase
+      .from("priority_selections")
+      .insert(payload);
 
     if (error) {
       console.error("Supabase error:", error);
+      alert(error.message);
       setStatus("error");
       return;
     }
 
     setStatus("success");
     setSelectedIds([]);
-    setForm({ organization: "", contact_name: "", contact_email: "", comment: "" });
+    setForm({
+      organization: "",
+      contact_name: "",
+      contact_email: "",
+      comment: "",
+    });
   };
 
   return (
     <footer className="mx-auto max-w-7xl px-6 pb-10">
-      <form onSubmit={handleSubmit} className="rounded-3xl px-6 py-8 text-white" style={{ backgroundColor: COLORS.dark }}>
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-3xl px-6 py-8 text-white"
+        style={{ backgroundColor: COLORS.dark }}
+      >
         <div className="flex flex-col gap-6">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
-              <h3 className="text-2xl font-semibold">Selecci?n de investigadores prioritarios</h3>
-              <p className="mt-2 text-blue-100">Seleccione hasta {maxSelections} perfiles con mayor potencial de colaboraci?n para el Hospital Jos? Carrasco Arteaga.</p>
-              <p className="mt-3 text-sm font-semibold">{selectedIds.length} / {maxSelections} seleccionados</p>
+              <h3 className="text-2xl font-semibold">
+                Selecci?n de investigadores prioritarios
+              </h3>
+
+              <p className="mt-2 text-blue-100">
+                Seleccione hasta {maxSelections} perfiles con mayor potencial
+                de colaboraci?n para el Hospital Jos? Carrasco Arteaga.
+              </p>
+
+              <p className="mt-3 text-sm font-semibold">
+                {selectedIds.length} / {maxSelections} seleccionados
+              </p>
             </div>
 
             <div className="relative w-full lg:w-96">
-              <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar investigador o ?rea" className="w-full rounded-2xl border border-white/20 bg-white py-3 pl-11 pr-4 text-slate-900 outline-none" />
+              <Search
+                className="absolute left-4 top-3.5 text-slate-400"
+                size={18}
+              />
+
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar investigador o ?rea"
+                className="w-full rounded-2xl border border-white/20 bg-white py-3 pl-11 pr-4 text-slate-900 outline-none"
+              />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <input required value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="Instituci?n / empresa" className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
-            <input required value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} placeholder="Nombre de contacto" className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
-            <input required type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="Correo" className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
+            <input
+              required
+              value={form.organization}
+              onChange={(e) =>
+                setForm({ ...form, organization: e.target.value })
+              }
+              placeholder="Instituci?n / empresa"
+              className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+            />
+
+            <input
+              required
+              value={form.contact_name}
+              onChange={(e) =>
+                setForm({ ...form, contact_name: e.target.value })
+              }
+              placeholder="Nombre de contacto"
+              className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+            />
+
+            <input
+              required
+              type="email"
+              value={form.contact_email}
+              onChange={(e) =>
+                setForm({ ...form, contact_email: e.target.value })
+              }
+              placeholder="Correo"
+              className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+            />
           </div>
 
-          <textarea value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} placeholder="Comentario general o necesidad prioritaria" className="min-h-24 rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none" />
+          <textarea
+            value={form.comment}
+            onChange={(e) => setForm({ ...form, comment: e.target.value })}
+            placeholder="Comentario general o necesidad prioritaria"
+            className="min-h-24 rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+          />
 
           <div className="max-h-[520px] overflow-auto pr-2">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {filteredResearchers.map((item) => {
                 const checked = selectedIds.includes(item.id);
+
                 return (
-                  <label key={item.id} className={`flex cursor-pointer items-start gap-4 rounded-2xl p-4 transition ${checked ? "bg-white text-slate-900" : "bg-white/10 hover:bg-white/20"}`}>
-                    <input type="checkbox" checked={checked} onChange={() => toggleSelection(item.id)} className="mt-1 h-5 w-5 rounded border-white/30" />
+                  <label
+                    key={item.id}
+                    className={`flex cursor-pointer items-start gap-4 rounded-2xl p-4 transition ${
+                      checked
+                        ? "bg-white text-slate-900"
+                        : "bg-white/10 hover:bg-white/20"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleSelection(item.id)}
+                      className="mt-1 h-5 w-5 rounded border-white/30"
+                    />
+
                     <div>
-                      <p className={checked ? "font-semibold text-slate-900" : "font-semibold text-white"}>{item.nombre}</p>
-                      <p className={checked ? "mt-1 text-sm text-slate-600" : "mt-1 text-sm text-blue-100"}>{item.key_interest.slice(0, 2).join(" | ")}</p>
-                      <p className={checked ? "mt-2 text-xs text-slate-500" : "mt-2 text-xs text-blue-100"}>{item.ods_label.join(", ")}</p>
+                      <p
+                        className={
+                          checked
+                            ? "font-semibold text-slate-900"
+                            : "font-semibold text-white"
+                        }
+                      >
+                        {item.nombre}
+                      </p>
+
+                      <p
+                        className={
+                          checked
+                            ? "mt-1 text-sm text-slate-600"
+                            : "mt-1 text-sm text-blue-100"
+                        }
+                      >
+                        {item.key_interest.slice(0, 2).join(" | ")}
+                      </p>
+
+                      <p
+                        className={
+                          checked
+                            ? "mt-2 text-xs text-slate-500"
+                            : "mt-2 text-xs text-blue-100"
+                        }
+                      >
+                        {item.ods_label.join(", ")}
+                      </p>
                     </div>
                   </label>
                 );
@@ -1142,13 +1246,36 @@ function PrioritySelectionForm({ researchers }) {
             </div>
           </div>
 
-          <button type="submit" disabled={status === "saving" || status === "success"} className="w-fit rounded-full bg-white px-6 py-3 text-sm font-semibold disabled:opacity-70" style={{ color: COLORS.primary }}>
-            {status === "saving" ? "Enviando..." : status === "success" ? "Selecci?n enviada" : "Enviar selecci?n"}
+          <button
+            type="submit"
+            disabled={status === "saving" || status === "success"}
+            className="w-fit rounded-full bg-white px-6 py-3 text-sm font-semibold disabled:opacity-70"
+            style={{ color: COLORS.primary }}
+          >
+            {status === "saving"
+              ? "Enviando..."
+              : status === "success"
+                ? "Selecci?n enviada"
+                : "Enviar selecci?n"}
           </button>
 
-          {status === "config-error" && <p className="text-sm text-red-200">Faltan las variables de Supabase en Vercel.</p>}
-          {status === "error" && <p className="text-sm text-red-200">No se pudo guardar la selecci?n. Revise Supabase.</p>}
-          {status === "success" && <p className="text-sm font-medium text-emerald-200">Respuesta guardada correctamente.</p>}
+          {status === "config-error" && (
+            <p className="text-sm text-red-200">
+              Faltan las variables de Supabase en Vercel.
+            </p>
+          )}
+
+          {status === "error" && (
+            <p className="text-sm text-red-200">
+              No se pudo guardar la selecci?n. Revise Supabase.
+            </p>
+          )}
+
+          {status === "success" && (
+            <p className="text-sm font-medium text-emerald-200">
+              Respuesta guardada correctamente.
+            </p>
+          )}
         </div>
       </form>
     </footer>
