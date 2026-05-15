@@ -11,6 +11,75 @@ const COLORS = {
   muted: "#475569",
 };
 
+const KEY_INTEREST_OPTIONS = [
+  "Inteligencia Artificial y Analítica de Datos",
+  "Ciberseguridad y Protección de Datos",
+  "Ingeniería Biomédica y Tecnologías para la Salud",
+  "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+  "Agua, Medio Ambiente y Salud Pública Ambiental",
+  "Agricultura Inteligente, Agroecología e Inocuidad",
+  "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+  "Psicología, Salud Mental y Bienestar Social",
+  "Movilidad Sostenible y Ciudades Inteligentes",
+  "Materiales, Manufactura e Infraestructura",
+  "Gestión Empresarial, Economía y Desarrollo Productivo",
+];
+
+
+
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function inferKeyInterest(item) {
+  const text = normalizeText(`${item.key_topics} ${item.research_interest}`);
+  const interests = [];
+
+if (/inteligencia artificial|machine learning|deep learning|ia|nlp|llm|datos|analitica|analisis de datos|software|chatbot|transformer|mineria|vision artificial|modelos de lenguaje|redes neuronales/.test(text)) {
+  interests.push("Inteligencia Artificial y Analítica de Datos");
+}
+
+if (/ciberseguridad|seguridad informatica|proteccion de datos|privacidad|auditoria regulatoria|antidelitos|ciberterrorismo|intrusos|contrasenas|delitos informaticos/.test(text)) {
+  interests.push("Ciberseguridad y Protección de Datos");
+}
+
+
+  if (/biomedic|salud|medic|clinica|diagnostic|protesis|sensor medic|rehabilit|neuro|eeg|bci|implante|odontolog|biosenal|tomografia|cancer/.test(text)) {
+    interests.push("Ingeniería Biomédica, Salud, Prótesis y Sensores Médicos");
+  }
+
+if (/telecomunic|iot|electronica|redes|inalambric|lora|lorawan|uwb|radiofrecuencia|antena|edge|fog|esp32|sensores/.test(text)) {
+  interests.push("Telecomunicaciones, IoT, Electrónica y Redes");
+}
+
+
+  if (/agricultura|agua|ambiente|medio ambiente|pesticida|hidric|microplastico|sustentable|sostenible|clima|ecosistema|cultivo|agro/.test(text)) {
+    interests.push("Agricultura Inteligente, Medio Ambiente y Agua");
+  }
+
+  if (/educacion|pedagog|inclusion|psicolog|bienestar|salud mental|violencia|demencia|autismo|discapacidad|social/.test(text)) {
+    interests.push("Educación Inclusiva, Psicología y Bienestar Social");
+  }
+
+  if (/movilidad|ciudad|smart city|smart cities|transporte|urbana|gps|flota|vehiculo|conduccion|emisiones/.test(text)) {
+    interests.push("Movilidad Sostenible y Ciudades Inteligentes (Smart Cities)");
+  }
+
+  if (/material|construccion|manufactura|impresion 3d|cad|cam|resina|polimero|compuesto|fractura|estructura|fem|cemento|ceram/.test(text)) {
+    interests.push("Ingeniería de Materiales, Construcción y Manufactura");
+  }
+
+  if (/gestion|empresa|economia|pymes|pyme|emprendedor|productiv|financier|turismo|calidad|qfd|organizacional/.test(text)) {
+    interests.push("Gestión Empresarial, Economía y Pymes");
+  }
+
+  return interests.length ? interests : ["Gestión Empresarial, Economía y Pymes"];
+}
+
+
 const rawResearchers = [
   {
     "id": "1",
@@ -272,7 +341,7 @@ const rawResearchers = [
   {
     "id": "20",
     "nombre": "Jorge Isaac Fajardo Seminario",
-    "url_photo": "https://pure.ups.edu.ec/en/persons/jorge-isaac-fajardo-seminario-3/",
+    "url_photo": "https://pure.ups.edu.ec/files-asset/26410620/fajardo_seminario_jorge_isaac.png?w=320&f=webp",
     "url": "https://pure.ups.edu.ec/en/persons/jorge-isaac-fajardo-seminario-3/",
     "research_interest": "Realiza ensayos físicos que correlacionan resinas sostenibles y técnicas complejas de conformado de materiales termomecánicos Compara coronas, mallas o implantes cerámicos creados en polímeros mediante tecnologías CNC / Impresión 3D, evaluando la resistencia mecánica post-envejecimiento por ciclos térmicos y la microdureza Desarrolla también alternativas limpias con fibras vegetales de guadua integradas en polímeros por extrusión, apoyando las tecnologías y biorrefinerías en base a descartes agro-biológicos en pro del sector automotriz o ingenieril",
     "key_topics": "Materiales Odontológicos Impresos en 3D (CAD/CAM)",
@@ -532,19 +601,186 @@ function inferApplications(text) {
   return [...new Set(apps)].slice(0, 4);
 }
 
+function inferOds(item) {
+  const name = item.nombre.toLowerCase();
+
+  if (name.includes("adrian eugenio ñauta")) {
+    return ["8", "9", "12"];
+  }
+
+  if (name.includes("diego rene urgiles") || name.includes("diego rené urgiles")) {
+    return ["7", "9", "11", "13"];
+  }
+
+  if (name.includes("jonnathan dario santos") || name.includes("jonnathan darío santos")) {
+    return ["9", "11", "12"];
+  }
+
+  return item.sdg;
+}
+
+const KEY_INTEREST_BY_ID = {
+  "1": [
+    "Gestión Empresarial, Economía y Desarrollo Productivo",
+  ],
+  "2": [
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+    "Inteligencia Artificial y Analítica de Datos",
+  ],
+  "3": [
+    "Movilidad Sostenible y Ciudades Inteligentes",
+    "Inteligencia Artificial y Analítica de Datos",
+  ],
+  "4": [
+    "Psicología, Salud Mental y Bienestar Social",
+  ],
+  "5": [
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "6": [
+    "Agua, Medio Ambiente y Salud Pública Ambiental",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+  "7": [
+    "Materiales, Manufactura e Infraestructura",
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "8": [
+    "Inteligencia Artificial y Analítica de Datos",
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "9": [
+    "Inteligencia Artificial y Analítica de Datos",
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+  ],
+  "10": [
+    "Psicología, Salud Mental y Bienestar Social",
+    "Gestión Empresarial, Economía y Desarrollo Productivo",
+  ],
+  "11": [
+    "Materiales, Manufactura e Infraestructura",
+    "Movilidad Sostenible y Ciudades Inteligentes",
+  ],
+  "12": [
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+    "Materiales, Manufactura e Infraestructura",
+  ],
+  "13": [
+    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+    "Movilidad Sostenible y Ciudades Inteligentes",
+  ],
+  "14": [
+    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "15": [
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "16": [
+    "Inteligencia Artificial y Analítica de Datos",
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "17": [
+    "Psicología, Salud Mental y Bienestar Social",
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+  ],
+  "18": [
+    "Materiales, Manufactura e Infraestructura",
+  ],
+  "19": [
+    "Inteligencia Artificial y Analítica de Datos",
+    "Movilidad Sostenible y Ciudades Inteligentes",
+    "Gestión Empresarial, Economía y Desarrollo Productivo",
+  ],
+  "20": [
+    "Materiales, Manufactura e Infraestructura",
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+  ],
+  "21": [
+    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+  ],
+  "22": [
+    "Gestión Empresarial, Economía y Desarrollo Productivo",
+  ],
+  "23": [
+    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+  "24": [
+    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+  ],
+  "25": [
+    "Gestión Empresarial, Economía y Desarrollo Productivo",
+    "Agua, Medio Ambiente y Salud Pública Ambiental",
+  ],
+  "26": [
+    "Ciberseguridad y Protección de Datos",
+  ],
+  "27": [
+    "Agua, Medio Ambiente y Salud Pública Ambiental",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+  "28": [
+    "Movilidad Sostenible y Ciudades Inteligentes",
+  ],
+  "29": [
+    "Agua, Medio Ambiente y Salud Pública Ambiental",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+  "30": [
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+    "Inteligencia Artificial y Analítica de Datos",
+  ],
+  "31": [
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+  "32": [
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+    "Psicología, Salud Mental y Bienestar Social",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+  "33": [
+    "Gestión Empresarial, Economía y Desarrollo Productivo",
+  ],
+  "34": [
+    "Ingeniería Biomédica y Tecnologías para la Salud",
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+  ],
+  "35": [
+    "Sensores, IoT, Telecomunicaciones y Sistemas Embebidos",
+    "Educación Inclusiva, Accesibilidad y Tecnologías Educativas",
+    "Agricultura Inteligente, Agroecología e Inocuidad",
+  ],
+};
+
+
 const researchers = rawResearchers.map((item) => {
   const tecnologias = splitTopics(item.key_topics);
   const aplicaciones = inferApplications(`${item.research_interest} ${item.key_topics}`);
+  const keyInterest = KEY_INTEREST_BY_ID[item.id] || [];
+  const ods = inferOds(item);
+
   return {
     ...item,
-    ods_label: item.sdg.map((s) => (s === "No especificado" ? s : `ODS ${s}`)),
+    ods,
+    ods_label: ods.map((s) => `ODS ${s}`),
+    ods_inferidos: item.sdg.includes("No especificado"),
+    key_interest: keyInterest,
     tecnologias,
     tecnologias_resumidas: tecnologias.slice(0, 4),
     perfil_resumido: summarize(item.research_interest),
-    area_estrategica: tecnologias[0] || "Capacidad científica",
-    aplicaciones_hospitalarias: aplicaciones.length ? aplicaciones : ["Exploración de colaboración interdisciplinaria"],
+    area_estrategica: keyInterest[0] || "Capacidad científica",
+    aplicaciones_hospitalarias: aplicaciones.length
+      ? aplicaciones
+      : ["Exploración de colaboración interdisciplinaria"],
   };
 });
+
 
 const odsOptions = [
   "Todas",
@@ -659,9 +895,17 @@ function CatalogCard({ item, onOpen }) {
         <div className="mb-3 flex flex-wrap gap-2">
           {item.aplicaciones_hospitalarias.slice(0, 2).map((app) => <span key={app} className="rounded-full px-3 py-1 text-xs" style={{ backgroundColor: COLORS.light, color: COLORS.primary }}>{app}</span>)}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {item.tecnologias_resumidas.map((tech) => <span key={tech} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">{tech}</span>)}
-        </div>
+<div className="flex flex-wrap gap-2">
+  {item.key_interest.slice(0, 2).map((interest) => (
+    <span
+      key={interest}
+      className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
+    >
+      {interest}
+    </span>
+  ))}
+</div>
+
         <button onClick={() => onOpen(item)} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white transition group-hover:shadow-md" style={{ backgroundColor: COLORS.primary }}>Ver perfil</button>
       </div>
     </article>
@@ -678,7 +922,16 @@ function Profile({ selected, onBack, onCollaborate }) {
           <h2 className="mt-6 text-3xl font-semibold" style={{ color: COLORS.text }}>{selected.nombre}</h2>
           <p className="mt-2" style={{ color: COLORS.primary }}>{selected.area_estrategica}</p>
           <div className="mt-6 flex flex-wrap gap-2">
-            {selected.ods_label.map((ods) => <span key={ods} className="rounded-full px-3 py-1 text-sm" style={{ backgroundColor: COLORS.light, color: COLORS.primary }}>{ods}</span>)}
+            {selected.ods_label.map((ods) => (
+  <span
+    key={ods}
+    className="rounded-full px-3 py-1 text-sm"
+    style={{ backgroundColor: COLORS.light, color: COLORS.primary }}
+  >
+    {ods}{selected.ods_inferidos ? " inferido" : ""}
+  </span>
+))}
+
           </div>
           <a href={selected.url} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 text-sm font-medium" style={{ color: COLORS.primary }}>Ver perfil PURE <ExternalLink size={16} /></a>
         </aside>
@@ -699,12 +952,26 @@ function Profile({ selected, onBack, onCollaborate }) {
             <p className="mt-3 leading-8" style={{ color: COLORS.muted }}>{selected.research_interest}</p>
           </div>
 
-          <div className="mt-8">
-            <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: COLORS.muted }}>Tecnologías y líneas de investigación</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {selected.tecnologias.map((tech) => <span key={tech} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700">{tech}</span>)}
-            </div>
-          </div>
+<div className="mt-8">
+  <p
+    className="text-sm font-semibold uppercase tracking-wide"
+    style={{ color: COLORS.muted }}
+  >
+    Temas específicos de investigación
+  </p>
+
+  <div className="mt-3 flex flex-wrap gap-2">
+    {(selected.tecnologias || []).map((topic) => (
+      <span
+        key={topic}
+        className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700"
+      >
+        {topic}
+      </span>
+    ))}
+  </div>
+</div>
+
 
           <button onClick={() => onCollaborate(selected)} className="mt-10 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}><HeartHandshake size={18} /> Registrar interés de colaboración</button>
         </main>
@@ -741,41 +1008,50 @@ function InterestModal({ researcher, onClose }) {
 
 export default function App() {
   const [selectedOds, setSelectedOds] = useState("Todas");
-  const [selectedTech, setSelectedTech] = useState("Todas");
+  const [selectedKeyInterest, setSelectedKeyInterest] = useState("Todas");
   const [selectedResearcher, setSelectedResearcher] = useState(null);
   const [interestResearcher, setInterestResearcher] = useState(null);
   const [query, setQuery] = useState("");
 
-const availableTechs = useMemo(() => {
-const base =
-  selectedOds === "Todas"
-    ? researchers
-    : researchers.filter((item) => item.ods_label.includes(selectedOds));
+const availableKeyInterests = useMemo(() => {
+  const base =
+    selectedOds === "Todas"
+      ? researchers
+      : researchers.filter((item) => item.ods_label.includes(selectedOds));
 
   return [
     "Todas",
-    ...new Set(base.flatMap((item) => item.tecnologias)),
+    ...KEY_INTEREST_OPTIONS.filter((interest) =>
+      base.some((item) => item.key_interest.includes(interest))
+    ),
   ];
 }, [selectedOds]);
 
+
 const filteredResearchers = useMemo(() => {
   return researchers.filter((item) => {
-    const content = `${item.nombre} ${item.area_estrategica} ${item.key_topics} ${item.research_interest}`.toLowerCase();
+    const content = normalizeText(
+      `${item.nombre} ${item.area_estrategica} ${item.key_interest.join(" ")} ${item.key_topics} ${item.research_interest}`
+    );
 
     const matchOds =
       selectedOds === "Todas" || item.ods_label.includes(selectedOds);
 
-    const matchTech =
-      selectedTech === "Todas" || item.tecnologias.includes(selectedTech);
+    const matchKeyInterest =
+      selectedKeyInterest === "Todas" ||
+      item.key_interest.includes(selectedKeyInterest);
 
-    const matchSearch =
-      content.includes(query.toLowerCase());
+    const matchSearch = content.includes(normalizeText(query));
 
-    return matchOds && matchTech && matchSearch;
+    return matchOds && matchKeyInterest && matchSearch;
   });
-}, [selectedOds, selectedTech, query]);
+}, [selectedOds, selectedKeyInterest, query]);
 
-  const handleOds = (ods) => { setSelectedOds(ods); setSelectedTech("Todas"); };
+
+const handleOds = (ods) => {
+  setSelectedOds(ods);
+  setSelectedKeyInterest("Todas");
+};
 
   if (selectedResearcher) {
     return <main style={{ backgroundColor: COLORS.bg, minHeight: "100vh" }}><Profile selected={selectedResearcher} onBack={() => setSelectedResearcher(null)} onCollaborate={setInterestResearcher} /><InterestModal researcher={interestResearcher} onClose={() => setInterestResearcher(null)} /></main>;
@@ -811,8 +1087,18 @@ const filteredResearchers = useMemo(() => {
     </Chip>
   ))}
 </div>
-          <p className="mb-3 mt-6 text-sm font-semibold text-slate-700">Tecnologías y líneas</p>
-          <div className="flex max-h-40 flex-wrap gap-2 overflow-auto pr-2">{availableTechs.map((tech) => <Chip key={tech} active={selectedTech === tech} onClick={() => setSelectedTech(tech)}>{tech}</Chip>)}</div>
+<p className="mb-3 mt-6 text-sm font-semibold text-slate-700">Áreas estratégicas</p>
+<div className="flex max-h-40 flex-wrap gap-2 overflow-auto pr-2">
+  {availableKeyInterests.map((interest) => (
+    <Chip
+      key={interest}
+      active={selectedKeyInterest === interest}
+      onClick={() => setSelectedKeyInterest(interest)}
+    >
+      {interest}
+    </Chip>
+  ))}
+</div>
         </div>
 
         <div className="mt-6 text-sm" style={{ color: COLORS.muted }}>{filteredResearchers.length} perfiles encontrados</div>
