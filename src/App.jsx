@@ -1120,12 +1120,12 @@ function PrioritySelectionForm({ researchers }) {
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <h3 className="text-2xl font-semibold">
-                Selecci?n de investigadores prioritarios
+                Selección de investigadores prioritarios
               </h3>
 
               <p className="mt-2 text-blue-100">
                 Seleccione hasta {maxSelections} perfiles con mayor potencial
-                de colaboraci?n para el Hospital Jos? Carrasco Arteaga.
+                de colaboración para el Hospital José Carrasco Arteaga.
               </p>
 
               <p className="mt-3 text-sm font-semibold">
@@ -1142,7 +1142,7 @@ function PrioritySelectionForm({ researchers }) {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar investigador o ?rea"
+                placeholder="Buscar investigador o área"
                 className="w-full rounded-2xl border border-white/20 bg-white py-3 pl-11 pr-4 text-slate-900 outline-none"
               />
             </div>
@@ -1155,7 +1155,7 @@ function PrioritySelectionForm({ researchers }) {
               onChange={(e) =>
                 setForm({ ...form, organization: e.target.value })
               }
-              placeholder="Instituci?n / empresa"
+              placeholder="Institución / empresa"
               className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
             />
 
@@ -1255,8 +1255,8 @@ function PrioritySelectionForm({ researchers }) {
             {status === "saving"
               ? "Enviando..."
               : status === "success"
-                ? "Selecci?n enviada"
-                : "Enviar selecci?n"}
+                ? "Selección enviada"
+                : "Enviar selección"}
           </button>
 
           {status === "config-error" && (
@@ -1267,7 +1267,7 @@ function PrioritySelectionForm({ researchers }) {
 
           {status === "error" && (
             <p className="text-sm text-red-200">
-              No se pudo guardar la selecci?n. Revise Supabase.
+              No se pudo guardar la selección. Revise Supabase.
             </p>
           )}
 
@@ -1282,7 +1282,206 @@ function PrioritySelectionForm({ researchers }) {
   );
 }
 
+function IntroLanding({ onEnter }) {
+  const scrollToPresentation = () => {
+    document.getElementById("presentacion")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <main style={{ backgroundColor: COLORS.bg, minHeight: "100vh" }}>
+      <section
+        className="relative overflow-hidden text-white"
+        style={{ backgroundColor: COLORS.primary }}
+      >
+        <div className="mx-auto max-w-7xl px-6 py-6">
+          <div className="flex w-full items-center gap-3 rounded-2xl bg-white px-6 py-4 shadow-sm">
+            <img
+              src="/logo-ups.png"
+              alt="Universidad Politécnica Salesiana"
+              className="h-14 w-auto object-contain"
+            />
+          </div>
+
+          <div className="grid items-center gap-12 py-20 lg:grid-cols-[1.15fr_.85fr]">
+            <div>
+
+
+              <h1 className="max-w-5xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
+                Capacidades científicas universitarias aplicadas al sector salud
+              </h1>
+
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-blue-50 md:text-xl">
+                Plataforma interactiva para explorar investigadores, áreas estratégicas,
+                ODS, tecnologías y oportunidades de colaboración con el Hospital José
+                Carrasco Arteaga.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={onEnter}
+                  className="rounded-full bg-white px-7 py-3 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5"
+                  style={{ color: COLORS.primary }}
+                >
+                  Ingresar a la plataforma
+                </button>
+
+                <button
+                  type="button"
+                  onClick={scrollToPresentation}
+                  className="rounded-full border border-white/30 px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Ver alcance
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-3xl bg-white/95 p-6 text-slate-900 shadow-2xl">
+              <p
+                className="text-sm font-semibold uppercase tracking-wide"
+                style={{ color: COLORS.muted }}
+              >
+                Enfoque de la plataforma
+              </p>
+
+              <div className="mt-6 grid gap-4">
+                <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
+                  <p className="text-2xl font-semibold" style={{ color: COLORS.text }}>
+                    35
+                  </p>
+                  <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
+                    PERFILES CIENTÍFICOS
+                  </p>
+                </div>
+
+                <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
+                  <p className="text-2xl font-semibold" style={{ color: COLORS.text }}>
+                    11
+                  </p>
+                  <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
+                    ÁREAS ESTRATÉGICAS DE COLABORACIÓN
+                  </p>
+                </div>
+
+                <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
+                  <p className="text-2xl font-semibold" style={{ color: COLORS.text }}>
+                    17 ODS Vinculados
+                  </p>
+                  <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
+                    CAPACIDADES ALINEADAS A OBJETIVOS DE DESARROLLO SOSTENIBLE
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="presentacion" className="mx-auto max-w-7xl px-6 py-14">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <Building2 size={28} style={{ color: COLORS.primary }} />
+            <h2 className="mt-5 text-xl font-semibold" style={{ color: COLORS.text }}>
+              Propósito institucional
+            </h2>
+            <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
+              Facilitar la identificación de capacidades científicas con potencial
+              de aplicación en salud, innovación hospitalaria y bienestar social.
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <Filter size={28} style={{ color: COLORS.primary }} />
+            <h2 className="mt-5 text-xl font-semibold" style={{ color: COLORS.text }}>
+              Exploración guiada
+            </h2>
+            <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
+              Los perfiles pueden revisarse por ODS, áreas estratégicas, intereses
+              de investigación y potencial de colaboración hospitalaria.
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <HeartHandshake size={28} style={{ color: COLORS.primary }} />
+            <h2 className="mt-5 text-xl font-semibold" style={{ color: COLORS.text }}>
+              Priorización colaborativa
+            </h2>
+            <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
+              La institución invitada puede seleccionar perfiles prioritarios y
+              registrar su interés para facilitar una siguiente etapa de vinculación.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+          <div className="grid gap-8 lg:grid-cols-[1fr_.8fr] lg:items-center">
+            <div>
+
+
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: COLORS.text }}>
+                Una vitrina de capacidades para identificar oportunidades reales de colaboración
+              </h2>
+
+              <p className="mt-4 leading-8" style={{ color: COLORS.muted }}>
+                Esta plataforma organiza información académica en un formato de lectura
+                rápida, visual y accionable. El objetivo no es mostrar un reporte, sino
+                facilitar decisiones: qué perfiles revisar, qué líneas se conectan con
+                necesidades del hospital y qué investigadores podrían priorizarse.
+              </p>
+            </div>
+
+            <div className="rounded-3xl p-6" style={{ backgroundColor: COLORS.light }}>
+              <p className="text-sm font-semibold" style={{ color: COLORS.primary }}>
+                Flujo sugerido
+              </p>
+
+              <div className="mt-5 space-y-4">
+                <div>
+                  <p className="font-semibold" style={{ color: COLORS.text }}>
+                    1. Explorar
+                  </p>
+                  <p className="text-sm" style={{ color: COLORS.muted }}>
+                    Revisar perfiles por ODS y áreas estratégicas.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold" style={{ color: COLORS.text }}>
+                    2. Analizar
+                  </p>
+                  <p className="text-sm" style={{ color: COLORS.muted }}>
+                    Abrir perfiles individuales y leer intereses de investigación.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold" style={{ color: COLORS.text }}>
+                    3. Priorizar
+                  </p>
+                  <p className="text-sm" style={{ color: COLORS.muted }}>
+                    Seleccionar los perfiles con mayor potencial de colaboración.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onEnter}
+                className="mt-7 w-full rounded-2xl px-5 py-3 text-sm font-semibold text-white"
+                style={{ backgroundColor: COLORS.primary }}
+              >
+                Comenzar exploración
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
   const [selectedOds, setSelectedOds] = useState("Todas");
   const [selectedKeyInterest, setSelectedKeyInterest] = useState("Todas");
   const [selectedResearcher, setSelectedResearcher] = useState(null);
@@ -1328,6 +1527,19 @@ const handleOds = (ods) => {
   setSelectedOds(ods);
   setSelectedKeyInterest("Todas");
 };
+
+const handleEnterPlatform = () => {
+  setShowIntro(false);
+
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 0);
+};
+
+if (showIntro) {
+  return <IntroLanding onEnter={handleEnterPlatform} />;
+}
+
 
   if (selectedResearcher) {
     return <main style={{ backgroundColor: COLORS.bg, minHeight: "100vh" }}><Profile selected={selectedResearcher} onBack={() => setSelectedResearcher(null)} onCollaborate={setInterestResearcher} /><InterestModal researcher={interestResearcher} onClose={() => setInterestResearcher(null)} /></main>;
