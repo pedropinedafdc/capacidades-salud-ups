@@ -1575,69 +1575,6 @@ function IntroLanding({ onEnter }) {
             </p>
           </div>
         </div>
-
-        <div className="mt-10 rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-          <div className="grid gap-8 lg:grid-cols-[1fr_.8fr] lg:items-center">
-            <div>
-
-
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: COLORS.text }}>
-                Información académica convertida en criterios de decisión
-              </h2>
-
-              <p className="mt-4 leading-8" style={{ color: COLORS.muted }}>
-                La plataforma no solo muestra perfiles. Ordena capacidades científicas para
-                que una institución pueda reconocer afinidades, comparar fortalezas y detectar
-                oportunidades de vinculación con mayor claridad antes de iniciar una reunión o
-                una propuesta formal.
-              </p>
-            </div>
-
-            <div className="rounded-3xl p-6" style={{ backgroundColor: COLORS.light }}>
-              <p className="text-sm font-semibold" style={{ color: COLORS.primary }}>
-                Qué valor aporta
-              </p>
-
-              <div className="mt-5 grid gap-4">
-                <div className="rounded-2xl bg-white p-4 shadow-sm">
-                  <p className="font-semibold" style={{ color: COLORS.text }}>
-                    Lectura rápida
-                  </p>
-                  <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-                    Resume información extensa de perfiles académicos en categorías fáciles de revisar.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white p-4 shadow-sm">
-                  <p className="font-semibold" style={{ color: COLORS.text }}>
-                    Comparación estratégica
-                  </p>
-                  <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-                    Permite contrastar investigadores por áreas, ODS, tecnologías y posibles aplicaciones.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-white p-4 shadow-sm">
-                  <p className="font-semibold" style={{ color: COLORS.text }}>
-                    Priorización accionable
-                  </p>
-                  <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-                    Convierte la exploración en señales claras para dar seguimiento institucional.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={onEnter}
-                className="mt-7 w-full rounded-2xl px-5 py-3 text-sm font-semibold text-white"
-                style={{ backgroundColor: COLORS.primary }}
-              >
-                Comenzar exploración
-              </button>
-            </div>
-          </div>
-        </div>
       </section>
     </main>
   );
