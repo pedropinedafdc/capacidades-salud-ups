@@ -1030,20 +1030,48 @@ function InterestModal({ researcher, onClose }) {
 
     setStatus("saving");
 
-    const payload = {
-      researcher_id: researcher.id,
-      researcher_name: researcher.nombre,
-      researcher_url: researcher.url,
-      contact_name: form.contact_name,
-      role: form.role,
-      contact_email: form.contact_email,
-      interest_level: form.interest_level,
-      message: form.comment,
-    };
+    const payloads = [
+      {
+        researcher_id: researcher.id,
+        researcher_name: researcher.nombre,
+        researcher_url: researcher.url,
+        requester_name: form.contact_name,
+        requester_email: form.contact_email,
+        requester_role: form.role,
+        interest_level: form.interest_level,
+        message: form.comment,
+      },
+      {
+        researcher_id: researcher.id,
+        researcher_name: researcher.nombre,
+        requester_name: form.contact_name,
+        requester_email: form.contact_email,
+        message: form.comment,
+      },
+      {
+        requester_name: form.contact_name,
+        requester_email: form.contact_email,
+        message: `${form.comment}\n\nInvestigador: ${researcher.nombre}\nCargo o área: ${form.role}\nNivel de interés: ${form.interest_level}`,
+      },
+    ];
 
-    const { error } = await supabase
-      .from("direct_collaboration_requests")
-      .insert(payload);
+    let error = null;
+
+    for (const payload of payloads) {
+      const result = await supabase
+        .from("direct_collaboration_requests")
+        .insert(payload);
+
+      error = result.error;
+
+      if (!error) {
+        break;
+      }
+
+      if (error.code !== "PGRST204") {
+        break;
+      }
+    }
 
     if (error) {
       console.error("Supabase error:", error);
