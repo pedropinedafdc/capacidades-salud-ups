@@ -886,7 +886,24 @@ function CatalogCard({ item, onOpen }) {
   return (
     <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <div className="flex gap-5 p-5">
-        <img src={item.url_photo} alt={item.nombre} className="h-24 w-24 rounded-2xl object-cover" onError={(e) => { e.currentTarget.src = "https://placehold.co/320x320/DCE8F5/003B82?text=UPS"; }} />
+        <img
+          src={item.url_photo}
+          alt={item.nombre}
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          className="h-24 w-24 shrink-0 rounded-2xl object-cover"
+          onError={(e) => {
+            const image = e.currentTarget;
+            if (!image.dataset.retry) {
+              image.dataset.retry = "true";
+              image.src = `${item.url_photo}${item.url_photo.includes("?") ? "&" : "?"}retry=1`;
+              return;
+            }
+
+            image.onerror = null;
+            image.src = "https://placehold.co/320x320/DCE8F5/003B82?text=UPS";
+          }}
+        />
         <div className="min-w-0 flex-1">
           <p className="line-clamp-1 text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.primary }}>{item.area_estrategica}</p>
           <h3 className="mt-1 text-xl font-semibold" style={{ color: COLORS.text }}>{item.nombre}</h3>
@@ -939,6 +956,17 @@ function Profile({ selected, onBack, onCollaborate }) {
         </aside>
 
         <main className="rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+          <div className="mb-8 rounded-2xl border border-blue-100 p-5" style={{ backgroundColor: COLORS.light }}>
+            <p className="text-sm font-semibold" style={{ color: COLORS.primary }}>
+              Ruta directa de colaboración
+            </p>
+            <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
+              Use esta ficha para decidir si existe interés en trabajar con este investigador específico.
+              Revise el detalle, abra su perfil PURE si necesita más información académica y, si encaja
+              con una necesidad concreta, deje una solicitud directa al final.
+            </p>
+          </div>
+
           <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: COLORS.muted }}>Perfil resumido</p>
           <p className="mt-3 text-lg leading-8" style={{ color: COLORS.text }}>{selected.perfil_resumido}</p>
 
@@ -975,7 +1003,7 @@ function Profile({ selected, onBack, onCollaborate }) {
 </div>
 
 
-          <button onClick={() => onCollaborate(selected)} className="mt-10 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}><HeartHandshake size={18} /> Registrar interés de colaboración</button>
+          <button onClick={() => onCollaborate(selected)} className="mt-10 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}><HeartHandshake size={18} /> Solicitar colaboración directa</button>
         </main>
       </div>
     </section>
@@ -983,25 +1011,94 @@ function Profile({ selected, onBack, onCollaborate }) {
 }
 
 function InterestModal({ researcher, onClose }) {
+  const [form, setForm] = useState({
+    contact_name: "",
+    role: "",
+    contact_email: "",
+    interest_level: "",
+    comment: "",
+  });
+  const [status, setStatus] = useState("idle");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!supabase) {
+      setStatus("config-error");
+      return;
+    }
+
+    setStatus("saving");
+
+    const payload = {
+      researcher_id: researcher.id,
+      researcher_name: researcher.nombre,
+      researcher_url: researcher.url,
+      contact_name: form.contact_name,
+      role: form.role,
+      contact_email: form.contact_email,
+      interest_level: form.interest_level,
+      comment: form.comment,
+    };
+
+    const { error } = await supabase
+      .from("direct_collaboration_requests")
+      .insert(payload);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      setStatus("error");
+      return;
+    }
+
+    setStatus("success");
+  };
+
   if (!researcher) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm" style={{ color: COLORS.muted }}>Registro de interés de colaboración</p>
+            <p className="text-sm" style={{ color: COLORS.muted }}>Solicitud directa de colaboración</p>
             <h3 className="mt-1 text-2xl font-semibold" style={{ color: COLORS.text }}>{researcher.nombre}</h3>
+            <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: COLORS.muted }}>
+              Complete este formulario solo si desea iniciar una conversación de trabajo con este investigador.
+              Para una priorización general de varios perfiles, use la encuesta al final del catálogo.
+            </p>
           </div>
           <button onClick={onClose} className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">Cerrar</button>
         </div>
-        <form className="mt-6 grid gap-4 md:grid-cols-2">
-          <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Nombre de la persona interesada" />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Cargo o área hospitalaria" />
-          <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Correo" type="email" />
+        <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
+          <input required value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Nombre de la persona interesada" />
+          <input required value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Cargo o área hospitalaria" />
+          <input required value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300" placeholder="Correo" type="email" />
           <input className="rounded-2xl border border-slate-200 px-4 py-3 outline-none" value={researcher.nombre} readOnly />
-          <select className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2"><option>Nivel de interés</option><option>Exploratorio</option><option>Alto</option><option>Prioritario</option></select>
-          <textarea className="min-h-32 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2" placeholder="Comentario o necesidad detectada" />
-          <button type="button" className="rounded-2xl px-5 py-3 text-sm font-semibold text-white md:col-span-2" style={{ backgroundColor: COLORS.primary }}>Enviar registro</button>
+          <select required value={form.interest_level} onChange={(e) => setForm({ ...form, interest_level: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2">
+            <option value="">Nivel de interés directo</option>
+            <option>Exploratorio</option>
+            <option>Alto</option>
+            <option>Prioritario</option>
+          </select>
+          <textarea required value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} className="min-h-32 rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-300 md:col-span-2" placeholder="Necesidad concreta, idea de proyecto o motivo de contacto" />
+          <button type="submit" disabled={status === "saving" || status === "success"} className="rounded-2xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-70 md:col-span-2" style={{ backgroundColor: COLORS.primary }}>
+            {status === "saving" ? "Enviando..." : status === "success" ? "Solicitud enviada" : "Enviar solicitud directa"}
+          </button>
+          {status === "config-error" && (
+            <p className="text-sm text-amber-700 md:col-span-2">
+              En esta prueba local falta configurar Supabase para guardar solicitudes directas.
+            </p>
+          )}
+          {status === "error" && (
+            <p className="text-sm text-red-600 md:col-span-2">
+              No se pudo guardar la solicitud directa. Revise la tabla de Supabase.
+            </p>
+          )}
+          {status === "success" && (
+            <p className="text-sm font-medium text-emerald-700 md:col-span-2">
+              Solicitud directa registrada correctamente.
+            </p>
+          )}
         </form>
       </motion.div>
     </div>
@@ -1120,12 +1217,13 @@ function PrioritySelectionForm({ researchers }) {
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
               <h3 className="text-2xl font-semibold">
-                Selección de investigadores prioritarios
+                Encuesta de interés institucional
               </h3>
 
               <p className="mt-2 text-blue-100">
-                Seleccione hasta {maxSelections} perfiles con mayor potencial
-                de colaboración para el Hospital José Carrasco Arteaga.
+                Use esta sección para indicar hasta {maxSelections} investigadores que despiertan interés general.
+                Seleccione perfiles según el área, tecnología o necesidad que desea explorar.
+                No inicia una colaboración directa; ayuda a priorizar perfiles para una siguiente conversación.
               </p>
 
               <p className="mt-3 text-sm font-semibold">
@@ -1184,7 +1282,7 @@ function PrioritySelectionForm({ researchers }) {
           <textarea
             value={form.comment}
             onChange={(e) => setForm({ ...form, comment: e.target.value })}
-            placeholder="Comentario general o necesidad prioritaria"
+                placeholder="Comentario general sobre necesidades, áreas de interés o criterios de priorización"
             className="min-h-24 rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
           />
 
@@ -1255,8 +1353,8 @@ function PrioritySelectionForm({ researchers }) {
             {status === "saving"
               ? "Enviando..."
               : status === "success"
-                ? "Selección enviada"
-                : "Enviar selección"}
+                ? "Encuesta enviada"
+                : "Enviar encuesta de interés"}
           </button>
 
           {status === "config-error" && (
@@ -1273,7 +1371,7 @@ function PrioritySelectionForm({ researchers }) {
 
           {status === "success" && (
             <p className="text-sm font-medium text-emerald-200">
-              Respuesta guardada correctamente.
+              Encuesta de interés guardada correctamente.
             </p>
           )}
         </div>
@@ -1311,9 +1409,9 @@ function IntroLanding({ onEnter }) {
               </h1>
 
               <p className="mt-6 max-w-3xl text-lg leading-8 text-blue-50 md:text-xl">
-                Plataforma interactiva para explorar investigadores, áreas estratégicas,
-                ODS, tecnologías y oportunidades de colaboración con el Hospital José
-                Carrasco Arteaga.
+                Plataforma interactiva para explorar investigadores, revisar capacidades
+                aplicadas a salud y registrar dos tipos de interés: una priorización general
+                de varios perfiles o una solicitud directa para un investigador específico.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -1341,34 +1439,68 @@ function IntroLanding({ onEnter }) {
                 className="text-sm font-semibold uppercase tracking-wide"
                 style={{ color: COLORS.muted }}
               >
-                Enfoque de la plataforma
+                Guía de exploración
               </p>
 
               <div className="mt-6 grid gap-4">
                 <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
-                  <p className="text-2xl font-semibold" style={{ color: COLORS.text }}>
-                    35
-                  </p>
-                  <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
-                    PERFILES CIENTÍFICOS
-                  </p>
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-semibold shadow-sm" style={{ color: COLORS.primary }}>
+                      35
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                        1. Filtre perfiles científicos
+                      </p>
+                      <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
+                        Explore 35 perfiles por nombre, área, red temática, necesidad hospitalaria
+                        o palabra clave.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
-                  <p className="text-2xl font-semibold" style={{ color: COLORS.text }}>
-                    11
-                  </p>
-                  <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
-                    ÁREAS ESTRATÉGICAS DE COLABORACIÓN
-                  </p>
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-semibold shadow-sm" style={{ color: COLORS.primary }}>
+                      17
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                        2. Oriente la búsqueda por ODS
+                      </p>
+                      <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
+                        Use los 17 ODS vinculados para ubicar capacidades alineadas con salud,
+                        innovación, ambiente, inclusión o desarrollo productivo.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
-                  <p className="text-2xl font-semibold" style={{ color: COLORS.text }}>
-                    17 ODS Vinculados
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white text-2xl font-semibold shadow-sm" style={{ color: COLORS.primary }}>
+                      84
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                        3. Compare tecnologías y decida
+                      </p>
+                      <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
+                        Revise 84 tecnologías, abra perfiles para ver detalle y perfil PURE,
+                        y al final seleccione hasta cinco investigadores en la encuesta.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl p-5" style={{ backgroundColor: COLORS.light }}>
+                  <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                    Colaboración directa
                   </p>
-                  <p className="mt-1 text-sm" style={{ color: COLORS.muted }}>
-                    CAPACIDADES ALINEADAS A OBJETIVOS DE DESARROLLO SOSTENIBLE
+                  <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
+                    Si un perfil encaja con una necesidad específica, puede solicitar una
+                    colaboración directa desde la ficha del investigador.
                   </p>
                 </div>
               </div>
@@ -1382,33 +1514,36 @@ function IntroLanding({ onEnter }) {
           <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <Building2 size={28} style={{ color: COLORS.primary }} />
             <h2 className="mt-5 text-xl font-semibold" style={{ color: COLORS.text }}>
-              Propósito institucional
+              1. Explorar capacidades
             </h2>
             <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
-              Facilitar la identificación de capacidades científicas con potencial
-              de aplicación en salud, innovación hospitalaria y bienestar social.
+              Revise el catálogo para identificar investigadores relacionados con su área
+              de interés. Puede filtrar por ODS, redes o áreas temáticas, tecnologías
+              y necesidades vinculadas al sector salud.
             </p>
           </div>
 
           <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <Filter size={28} style={{ color: COLORS.primary }} />
             <h2 className="mt-5 text-xl font-semibold" style={{ color: COLORS.text }}>
-              Exploración guiada
+              2. Analizar perfiles
             </h2>
             <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
-              Los perfiles pueden revisarse por ODS, áreas estratégicas, intereses
-              de investigación y potencial de colaboración hospitalaria.
+              Al ingresar a un perfil puede leer el resumen, revisar temas específicos,
+              abrir la página PURE del investigador y decidir si existe una oportunidad
+              concreta de colaboración.
             </p>
           </div>
 
           <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <HeartHandshake size={28} style={{ color: COLORS.primary }} />
             <h2 className="mt-5 text-xl font-semibold" style={{ color: COLORS.text }}>
-              Priorización colaborativa
+              3. Registrar interés
             </h2>
             <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
-              La institución invitada puede seleccionar perfiles prioritarios y
-              registrar su interés para facilitar una siguiente etapa de vinculación.
+              Al final del catálogo encontrará una encuesta para seleccionar hasta cinco
+              investigadores según su área y necesidad. Si desea trabajar directamente
+              con una persona, use la solicitud directa dentro de su perfil.
             </p>
           </div>
         </div>
@@ -1424,9 +1559,10 @@ function IntroLanding({ onEnter }) {
 
               <p className="mt-4 leading-8" style={{ color: COLORS.muted }}>
                 Esta plataforma organiza información académica en un formato de lectura
-                rápida, visual y accionable. El objetivo no es mostrar un reporte, sino
-                facilitar decisiones: qué perfiles revisar, qué líneas se conectan con
-                necesidades del hospital y qué investigadores podrían priorizarse.
+                rápida, visual y accionable. El objetivo es facilitar decisiones sencillas:
+                qué perfiles revisar, cómo compararlos según el área o necesidad, cuáles
+                conviene priorizar en la encuesta y cuándo vale la pena iniciar una
+                solicitud directa de colaboración.
               </p>
             </div>
 
@@ -1438,28 +1574,28 @@ function IntroLanding({ onEnter }) {
               <div className="mt-5 space-y-4">
                 <div>
                   <p className="font-semibold" style={{ color: COLORS.text }}>
-                    1. Explorar
+                    1. Explorar perfiles
                   </p>
                   <p className="text-sm" style={{ color: COLORS.muted }}>
-                    Revisar perfiles por ODS y áreas estratégicas.
+                    Buscar por nombre, ODS, redes o áreas temáticas, tecnología y necesidad.
                   </p>
                 </div>
 
                 <div>
                   <p className="font-semibold" style={{ color: COLORS.text }}>
-                    2. Analizar
+                    2. Analizar una ficha
                   </p>
                   <p className="text-sm" style={{ color: COLORS.muted }}>
-                    Abrir perfiles individuales y leer intereses de investigación.
+                    Revisar resumen, potencial hospitalario, temas específicos y perfil PURE.
                   </p>
                 </div>
 
                 <div>
                   <p className="font-semibold" style={{ color: COLORS.text }}>
-                    3. Priorizar
+                    3. Registrar interés
                   </p>
                   <p className="text-sm" style={{ color: COLORS.muted }}>
-                    Seleccionar los perfiles con mayor potencial de colaboración.
+                    Seleccionar hasta cinco investigadores en la encuesta o pedir colaboración directa.
                   </p>
                 </div>
               </div>
@@ -1536,6 +1672,14 @@ const handleEnterPlatform = () => {
   }, 0);
 };
 
+const handleOpenResearcher = (researcher) => {
+  setSelectedResearcher(researcher);
+
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 0);
+};
+
 if (showIntro) {
   return <IntroLanding onEnter={handleEnterPlatform} />;
 }
@@ -1553,11 +1697,30 @@ if (showIntro) {
           <div>
             <p className="inline-flex items-center gap-2 text-sm font-medium" style={{ color: COLORS.primary }}><Filter size={16} /> Catálogo de capacidades</p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight" style={{ color: COLORS.text }}>Investigadores pertinentes para colaboración en salud</h2>
-            <p className="mt-3 max-w-3xl" style={{ color: COLORS.muted }}>Filtre por ODS, tecnología o potencial de aplicación hospitalaria para identificar perfiles de colaboración.</p>
+            <p className="mt-3 max-w-3xl" style={{ color: COLORS.muted }}>
+              Primero explore y compare perfiles usando búsqueda y filtros. Luego puede abrir una ficha
+              para revisar detalles, entrar al perfil PURE o pedir una colaboración directa; al final
+              encontrará la encuesta para priorizar hasta cinco investigadores.
+            </p>
           </div>
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar investigador, tecnología o área" className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 outline-none focus:border-blue-300" />
+          </div>
+        </div>
+
+        <div className="mb-6 grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold" style={{ color: COLORS.text }}>Para explorar</p>
+            <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+              Use búsqueda y filtros por ODS, redes o áreas temáticas, tecnología y necesidad.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold" style={{ color: COLORS.text }}>Para registrar interés</p>
+            <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+              Solicitud directa: un investigador específico. Encuesta final: hasta cinco perfiles prioritarios.
+            </p>
           </div>
         </div>
 
@@ -1590,7 +1753,7 @@ if (showIntro) {
         </div>
 
         <div className="mt-6 text-sm" style={{ color: COLORS.muted }}>{filteredResearchers.length} perfiles encontrados</div>
-        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{filteredResearchers.map((item) => <CatalogCard key={item.id} item={item} onOpen={setSelectedResearcher} />)}</div>
+        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{filteredResearchers.map((item) => <CatalogCard key={item.id} item={item} onOpen={handleOpenResearcher} />)}</div>
         {filteredResearchers.length === 0 && <div className="mt-8 rounded-3xl bg-white p-10 text-center ring-1 ring-slate-200"><p className="text-lg font-medium" style={{ color: COLORS.text }}>No se encontraron perfiles con esos filtros.</p><p className="mt-2" style={{ color: COLORS.muted }}>Pruebe con otro ODS, tecnología o palabra clave.</p></div>}
       </section>
 <PrioritySelectionForm researchers={researchers} />
