@@ -1582,48 +1582,47 @@ function IntroLanding({ onEnter }) {
 
 
               <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: COLORS.text }}>
-                Una vitrina de capacidades para identificar oportunidades reales de colaboración
+                Información académica convertida en criterios de decisión
               </h2>
 
               <p className="mt-4 leading-8" style={{ color: COLORS.muted }}>
-                Esta plataforma organiza información académica en un formato de lectura
-                rápida, visual y accionable. El objetivo es facilitar decisiones sencillas:
-                qué perfiles revisar, cómo compararlos según el área o necesidad, cuáles
-                conviene priorizar en la encuesta y cuándo vale la pena iniciar una
-                solicitud directa de colaboración.
+                La plataforma no solo muestra perfiles. Ordena capacidades científicas para
+                que una institución pueda reconocer afinidades, comparar fortalezas y detectar
+                oportunidades de vinculación con mayor claridad antes de iniciar una reunión o
+                una propuesta formal.
               </p>
             </div>
 
             <div className="rounded-3xl p-6" style={{ backgroundColor: COLORS.light }}>
               <p className="text-sm font-semibold" style={{ color: COLORS.primary }}>
-                Flujo sugerido
+                Qué valor aporta
               </p>
 
-              <div className="mt-5 space-y-4">
-                <div>
+              <div className="mt-5 grid gap-4">
+                <div className="rounded-2xl bg-white p-4 shadow-sm">
                   <p className="font-semibold" style={{ color: COLORS.text }}>
-                    1. Explorar perfiles
+                    Lectura rápida
                   </p>
-                  <p className="text-sm" style={{ color: COLORS.muted }}>
-                    Buscar por nombre, ODS, redes o áreas temáticas, tecnología y necesidad.
+                  <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+                    Resume información extensa de perfiles académicos en categorías fáciles de revisar.
                   </p>
                 </div>
 
-                <div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm">
                   <p className="font-semibold" style={{ color: COLORS.text }}>
-                    2. Analizar una ficha
+                    Comparación estratégica
                   </p>
-                  <p className="text-sm" style={{ color: COLORS.muted }}>
-                    Revisar resumen, potencial hospitalario, temas específicos y perfil PURE.
+                  <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+                    Permite contrastar investigadores por áreas, ODS, tecnologías y posibles aplicaciones.
                   </p>
                 </div>
 
-                <div>
+                <div className="rounded-2xl bg-white p-4 shadow-sm">
                   <p className="font-semibold" style={{ color: COLORS.text }}>
-                    3. Registrar interés
+                    Priorización accionable
                   </p>
-                  <p className="text-sm" style={{ color: COLORS.muted }}>
-                    Seleccionar hasta cinco investigadores en la encuesta o pedir colaboración directa.
+                  <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+                    Convierte la exploración en señales claras para dar seguimiento institucional.
                   </p>
                 </div>
               </div>
