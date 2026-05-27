@@ -1038,7 +1038,7 @@ function InterestModal({ researcher, onClose }) {
       role: form.role,
       contact_email: form.contact_email,
       interest_level: form.interest_level,
-      comment: form.comment,
+      message: form.comment,
     };
 
     const { error } = await supabase
@@ -1091,7 +1091,7 @@ function InterestModal({ researcher, onClose }) {
           )}
           {status === "error" && (
             <p className="text-sm text-red-600 md:col-span-2">
-              No se pudo guardar la solicitud directa. Revise la tabla de Supabase.
+              No pudimos registrar la solicitud en este momento. Intente nuevamente o contacte al equipo de la plataforma.
             </p>
           )}
           {status === "success" && (
