@@ -1144,8 +1144,6 @@ function PrioritySelectionForm({ researchers }) {
   });
   const [status, setStatus] = useState("idle");
 
-  const maxSelections = 5;
-
   const filteredResearchers = useMemo(() => {
     return researchers.filter((item) => {
       const content = normalizeText(
@@ -1169,11 +1167,6 @@ function PrioritySelectionForm({ researchers }) {
     setSelectedIds((current) => {
       if (current.includes(id)) {
         return current.filter((itemId) => itemId !== id);
-      }
-
-      if (current.length >= maxSelections) {
-        alert(`Puede seleccionar hasta ${maxSelections} investigadores.`);
-        return current;
       }
 
       return [...current, id];
@@ -1248,14 +1241,8 @@ function PrioritySelectionForm({ researchers }) {
                 Encuesta de interés institucional
               </h3>
 
-              <p className="mt-2 text-blue-100">
-                Use esta sección para indicar hasta {maxSelections} investigadores que despiertan interés general.
-                Seleccione perfiles según el área, tecnología o necesidad que desea explorar.
-                No inicia una colaboración directa; ayuda a priorizar perfiles para una siguiente conversación.
-              </p>
-
               <p className="mt-3 text-sm font-semibold">
-                {selectedIds.length} / {maxSelections} seleccionados
+                {selectedIds.length} seleccionados
               </p>
             </div>
 
@@ -1516,7 +1503,7 @@ function IntroLanding({ onEnter }) {
                       </p>
                       <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
                         Revise 84 tecnologías, abra perfiles para ver detalle y perfil PURE,
-                        y al final seleccione hasta cinco investigadores en la encuesta.
+                        y al final registre los investigadores de interés en la encuesta.
                       </p>
                     </div>
                   </div>
@@ -1569,8 +1556,8 @@ function IntroLanding({ onEnter }) {
               3. Registrar interés
             </h2>
             <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
-              Al final del catálogo encontrará una encuesta para seleccionar hasta cinco
-              investigadores según su área y necesidad. Si desea trabajar directamente
+              Al final del catálogo encontrará una encuesta para registrar investigadores
+              según su área y necesidad. Si desea trabajar directamente
               con una persona, use la solicitud directa dentro de su perfil.
             </p>
           </div>
@@ -1664,7 +1651,7 @@ if (showIntro) {
             <p className="mt-3 max-w-3xl" style={{ color: COLORS.muted }}>
               Primero explore y compare perfiles usando búsqueda y filtros. Luego puede abrir una ficha
               para revisar detalles, entrar al perfil PURE o pedir una colaboración directa; al final
-              encontrará la encuesta para priorizar hasta cinco investigadores.
+              encontrará la encuesta para registrar investigadores de interés.
             </p>
           </div>
           <div className="relative w-full md:w-96">
@@ -1683,7 +1670,7 @@ if (showIntro) {
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <p className="text-sm font-semibold" style={{ color: COLORS.text }}>Para registrar interés</p>
             <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-              Solicitud directa: un investigador específico. Encuesta final: hasta cinco perfiles prioritarios.
+              Solicitud directa: un investigador específico. Encuesta final: perfiles prioritarios.
             </p>
           </div>
         </div>
