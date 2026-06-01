@@ -936,7 +936,7 @@ function CatalogCard({ item, onOpen, inCart, onToggleCart }) {
             }`}
           >
             {inCart ? <ShoppingCart size={16} /> : <Plus size={16} />}
-            {inCart ? "En carrito" : "Añadir"}
+            {inCart ? "En perfiles de interés" : "Añadir a perfiles"}
           </button>
         </div>
       </div>
@@ -1019,10 +1019,10 @@ function Profile({ selected, onBack, onCollaborate, inCart, onToggleCart, onOpen
           <div className="mt-10 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="font-semibold" style={{ color: COLORS.text }}>
-                Carrito de perfiles de interés
+                Perfiles de interés
               </p>
               <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-                Añada este perfil al carrito si desea revisarlo junto con otros investigadores antes de enviar la solicitud institucional.
+                Añada este perfil a su lista de interés si desea revisarlo junto con otros investigadores antes de enviar la solicitud institucional.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1035,7 +1035,7 @@ function Profile({ selected, onBack, onCollaborate, inCart, onToggleCart, onOpen
                 style={inCart ? {} : { backgroundColor: COLORS.primary }}
               >
                 {inCart ? <Trash2 size={18} /> : <ShoppingCart size={18} />}
-                {inCart ? "Quitar del carrito" : "Añadir al carrito"}
+                {inCart ? "Quitar de perfiles de interés" : "Añadir a perfiles de interés"}
               </button>
               <button
                 type="button"
@@ -1043,7 +1043,7 @@ function Profile({ selected, onBack, onCollaborate, inCart, onToggleCart, onOpen
                 className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200"
               >
                 <ShoppingCart size={18} />
-                Ver carrito
+                Ver perfiles de interés
               </button>
             </div>
           </div>
@@ -1137,7 +1137,7 @@ function InterestModal({ researcher, onClose }) {
             <h3 className="mt-1 text-2xl font-semibold" style={{ color: COLORS.text }}>{researcher.nombre}</h3>
             <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: COLORS.muted }}>
               Complete este formulario solo si desea iniciar una conversación de trabajo con este investigador.
-              Para seleccionar varios perfiles, use el carrito de interés institucional.
+              Para seleccionar varios perfiles, use la lista de perfiles de interés.
             </p>
           </div>
           <button onClick={onClose} className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">Cerrar</button>
@@ -1187,7 +1187,7 @@ function CartFloatingButton({ count, onOpen }) {
       style={{ backgroundColor: COLORS.primary }}
     >
       <ShoppingCart size={20} />
-      Carrito
+      Perfiles de interés
       <span className="rounded-full bg-white px-2 py-0.5 text-xs" style={{ color: COLORS.primary }}>
         {count}
       </span>
@@ -1279,13 +1279,13 @@ function CartCheckout({ open, researchers, cartIds, onClose, onRemove, onClear }
             <div>
               <p className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: COLORS.primary }}>
                 <ShoppingCart size={18} />
-                Carrito de perfiles de interés
+                Perfiles de interés
               </p>
               <h3 className="mt-2 text-2xl font-semibold" style={{ color: COLORS.text }}>
                 Revisar y enviar solicitud institucional
               </h3>
               <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
-                Ajuste la selección antes de enviar. Puede quitar perfiles del carrito y completar los datos de contacto.
+                Ajuste la selección antes de enviar. Puede quitar perfiles de interés y completar los datos de contacto.
               </p>
             </div>
             <button
@@ -1304,14 +1304,14 @@ function CartCheckout({ open, researchers, cartIds, onClose, onRemove, onClear }
               </p>
               {selectedResearchers.length > 0 && (
                 <button type="button" onClick={onClear} className="text-sm font-semibold text-slate-500 hover:text-slate-900">
-                  Vaciar carrito
+                  Vaciar perfiles
                 </button>
               )}
             </div>
 
             {selectedResearchers.length === 0 ? (
               <div className="rounded-2xl bg-white p-6 text-center text-sm" style={{ color: COLORS.muted }}>
-                El carrito está vacío. Añada perfiles desde el catálogo o desde una ficha de investigador.
+                No hay perfiles de interés seleccionados. Añada perfiles desde el catálogo o desde una ficha de investigador.
               </div>
             ) : (
               <div className="grid gap-3 md:grid-cols-2">
@@ -1399,7 +1399,7 @@ function CartCheckout({ open, researchers, cartIds, onClose, onRemove, onClear }
               ? "Enviando..."
               : status === "success"
                 ? "Solicitud enviada"
-                : "Enviar solicitud del carrito"}
+                : "Enviar solicitud institucional"}
           </button>
 
           {status === "config-error" && (
@@ -1416,7 +1416,7 @@ function CartCheckout({ open, researchers, cartIds, onClose, onRemove, onClear }
 
           {status === "success" && (
             <p className="text-sm font-medium text-emerald-700">
-              Solicitud del carrito registrada correctamente.
+              Solicitud institucional registrada correctamente.
             </p>
           )}
         </div>
@@ -1455,7 +1455,7 @@ function IntroLanding({ onEnter }) {
 
               <p className="mt-6 max-w-3xl text-lg leading-8 text-blue-50 md:text-xl">
                 Plataforma interactiva para explorar investigadores, revisar capacidades
-                aplicadas a salud y guardar perfiles de interés en un carrito antes de enviar
+                aplicadas a salud y guardar perfiles de interés antes de enviar
                 una solicitud institucional.
               </p>
 
@@ -1533,7 +1533,7 @@ function IntroLanding({ onEnter }) {
                       </p>
                       <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
                         Revise 84 tecnologías, abra perfiles para ver detalle y perfil PURE,
-                        y añada al carrito los investigadores que desea considerar.
+                        y añada a perfiles de interés los investigadores que desea considerar.
                       </p>
                     </div>
                   </div>
@@ -1586,7 +1586,7 @@ function IntroLanding({ onEnter }) {
               3. Registrar interés
             </h2>
             <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
-              Añada perfiles al carrito mientras navega. Al finalizar, revise la selección,
+              Añada perfiles de interés mientras navega. Al finalizar, revise la selección,
               quite o mantenga investigadores y envíe la solicitud institucional.
             </p>
           </div>
@@ -1719,7 +1719,7 @@ if (showIntro) {
             <p className="mt-3 max-w-3xl" style={{ color: COLORS.muted }}>
               Primero explore y compare perfiles usando búsqueda y filtros. Luego puede abrir una ficha,
               revisar detalles, entrar al perfil PURE, pedir una colaboración directa o añadir perfiles
-              al carrito para una solicitud institucional.
+              a perfiles de interés para una solicitud institucional.
             </p>
           </div>
           <div className="relative w-full md:w-96">
@@ -1738,7 +1738,7 @@ if (showIntro) {
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <p className="text-sm font-semibold" style={{ color: COLORS.text }}>Para registrar interés</p>
             <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-              Carrito: varios perfiles de interés. Solicitud directa: un investigador específico.
+              Perfiles de interés: varios investigadores seleccionados. Solicitud directa: un investigador específico.
             </p>
           </div>
         </div>
