@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Search, ExternalLink, Mail, ArrowLeft, HeartHandshake, Filter, Building2 } from "lucide-react";
+import { Search, ExternalLink, ArrowLeft, HeartHandshake, Filter, Building2, ShoppingCart, Plus, Trash2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "./supabaseClient";
 
@@ -882,7 +882,7 @@ function Header({ onExplore }) {
   );
 }
 
-function CatalogCard({ item, onOpen }) {
+function CatalogCard({ item, onOpen, inCart, onToggleCart }) {
   return (
     <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <div className="flex gap-5 p-5">
@@ -924,14 +924,27 @@ function CatalogCard({ item, onOpen }) {
     </span>
   ))}
 </div>
-
-        <button onClick={() => onOpen(item)} className="mt-5 w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white transition group-hover:shadow-md" style={{ backgroundColor: COLORS.primary }}>Ver perfil</button>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <button onClick={() => onOpen(item)} className="rounded-2xl px-4 py-3 text-sm font-semibold text-white transition group-hover:shadow-md" style={{ backgroundColor: COLORS.primary }}>Ver perfil</button>
+          <button
+            type="button"
+            onClick={() => onToggleCart(item.id)}
+            className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+              inCart
+                ? "border-blue-200 bg-blue-50 text-blue-900"
+                : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50"
+            }`}
+          >
+            {inCart ? <ShoppingCart size={16} /> : <Plus size={16} />}
+            {inCart ? "En carrito" : "Añadir"}
+          </button>
+        </div>
       </div>
     </article>
   );
 }
 
-function Profile({ selected, onBack, onCollaborate }) {
+function Profile({ selected, onBack, onCollaborate, inCart, onToggleCart, onOpenCart }) {
   return (
     <section className="mx-auto max-w-7xl px-6 py-10">
       <button onClick={onBack} className="mb-6 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"><ArrowLeft size={16} /> Volver al catálogo</button>
@@ -1003,7 +1016,39 @@ function Profile({ selected, onBack, onCollaborate }) {
 </div>
 
 
-          <button onClick={() => onCollaborate(selected)} className="mt-10 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}><HeartHandshake size={18} /> Solicitar colaboración directa</button>
+          <div className="mt-10 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="font-semibold" style={{ color: COLORS.text }}>
+                Carrito de perfiles de interés
+              </p>
+              <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+                Añada este perfil al carrito si desea revisarlo junto con otros investigadores antes de enviar la solicitud institucional.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onToggleCart(selected.id)}
+                className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold shadow-sm ${
+                  inCart ? "bg-white text-slate-700 ring-1 ring-slate-200" : "text-white"
+                }`}
+                style={inCart ? {} : { backgroundColor: COLORS.primary }}
+              >
+                {inCart ? <Trash2 size={18} /> : <ShoppingCart size={18} />}
+                {inCart ? "Quitar del carrito" : "Añadir al carrito"}
+              </button>
+              <button
+                type="button"
+                onClick={onOpenCart}
+                className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200"
+              >
+                <ShoppingCart size={18} />
+                Ver carrito
+              </button>
+            </div>
+          </div>
+
+          <button onClick={() => onCollaborate(selected)} className="mt-6 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-sm" style={{ backgroundColor: COLORS.primary }}><HeartHandshake size={18} /> Solicitar colaboración directa</button>
         </main>
       </div>
     </section>
@@ -1092,7 +1137,7 @@ function InterestModal({ researcher, onClose }) {
             <h3 className="mt-1 text-2xl font-semibold" style={{ color: COLORS.text }}>{researcher.nombre}</h3>
             <p className="mt-2 max-w-xl text-sm leading-6" style={{ color: COLORS.muted }}>
               Complete este formulario solo si desea iniciar una conversación de trabajo con este investigador.
-              Para una priorización general de varios perfiles, use la encuesta al final del catálogo.
+              Para seleccionar varios perfiles, use el carrito de interés institucional.
             </p>
           </div>
           <button onClick={onClose} className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">Cerrar</button>
@@ -1133,45 +1178,38 @@ function InterestModal({ researcher, onClose }) {
   );
 }
 
-function PrioritySelectionForm({ researchers }) {
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [query, setQuery] = useState("");
+function CartFloatingButton({ count, onOpen }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-3 rounded-full px-5 py-4 text-sm font-semibold text-white shadow-2xl transition hover:-translate-y-0.5"
+      style={{ backgroundColor: COLORS.primary }}
+    >
+      <ShoppingCart size={20} />
+      Carrito
+      <span className="rounded-full bg-white px-2 py-0.5 text-xs" style={{ color: COLORS.primary }}>
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function CartCheckout({ open, researchers, cartIds, onClose, onRemove, onClear }) {
   const [form, setForm] = useState({
     organization: "",
     contact_name: "",
+    contact_role: "",
     contact_email: "",
     comment: "",
   });
   const [status, setStatus] = useState("idle");
 
-  const filteredResearchers = useMemo(() => {
-    return researchers.filter((item) => {
-      const content = normalizeText(
-        [
-          item.nombre,
-          item.area_estrategica,
-          item.key_interest.join(" "),
-          item.key_topics,
-        ].join(" ")
-      );
-
-      return content.includes(normalizeText(query));
-    });
-  }, [query, researchers]);
-
   const selectedResearchers = useMemo(() => {
-    return researchers.filter((item) => selectedIds.includes(item.id));
-  }, [researchers, selectedIds]);
-
-  const toggleSelection = (id) => {
-    setSelectedIds((current) => {
-      if (current.includes(id)) {
-        return current.filter((itemId) => itemId !== id);
-      }
-
-      return [...current, id];
-    });
-  };
+    return cartIds
+      .map((id) => researchers.find((item) => item.id === id))
+      .filter(Boolean);
+  }, [cartIds, researchers]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -1192,7 +1230,7 @@ function PrioritySelectionForm({ researchers }) {
       organization: form.organization,
       contact_name: form.contact_name,
       contact_email: form.contact_email,
-      comment: form.comment,
+      comment: `Cargo o rol: ${form.contact_role}\n\n${form.comment}`,
       selected_count: selectedResearchers.length,
       selected_researchers: selectedResearchers.map((item) => ({
         id: item.id,
@@ -1218,58 +1256,97 @@ function PrioritySelectionForm({ researchers }) {
     }
 
     setStatus("success");
-    setSelectedIds([]);
+    onClear();
     setForm({
       organization: "",
       contact_name: "",
+      contact_role: "",
       contact_email: "",
       comment: "",
     });
   };
 
+  if (!open) return null;
+
   return (
-    <footer className="mx-auto max-w-7xl px-6 pb-10">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-sm">
       <form
         onSubmit={handleSubmit}
-        className="rounded-3xl px-6 py-8 text-white"
-        style={{ backgroundColor: COLORS.dark }}
+        className="mx-auto my-6 max-w-5xl rounded-3xl bg-white p-6 shadow-2xl"
       >
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-2xl font-semibold">
-                Encuesta de interés institucional
+              <p className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: COLORS.primary }}>
+                <ShoppingCart size={18} />
+                Carrito de perfiles de interés
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold" style={{ color: COLORS.text }}>
+                Revisar y enviar solicitud institucional
               </h3>
-
-              <p className="mt-3 text-sm font-semibold">
-                {selectedIds.length} seleccionados
+              <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
+                Ajuste la selección antes de enviar. Puede quitar perfiles del carrito y completar los datos de contacto.
               </p>
             </div>
-
-            <div className="relative w-full lg:w-96">
-              <Search
-                className="absolute left-4 top-3.5 text-slate-400"
-                size={18}
-              />
-
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar investigador o área"
-                className="w-full rounded-2xl border border-white/20 bg-white py-3 pl-11 pr-4 text-slate-900 outline-none"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full bg-slate-100 p-2 text-slate-600 transition hover:bg-slate-200"
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <p className="text-sm font-semibold" style={{ color: COLORS.text }}>
+                {selectedResearchers.length} perfiles seleccionados
+              </p>
+              {selectedResearchers.length > 0 && (
+                <button type="button" onClick={onClear} className="text-sm font-semibold text-slate-500 hover:text-slate-900">
+                  Vaciar carrito
+                </button>
+              )}
+            </div>
+
+            {selectedResearchers.length === 0 ? (
+              <div className="rounded-2xl bg-white p-6 text-center text-sm" style={{ color: COLORS.muted }}>
+                El carrito está vacío. Añada perfiles desde el catálogo o desde una ficha de investigador.
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {selectedResearchers.map((item) => (
+                  <div key={item.id} className="flex items-start justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+                    <div>
+                      <p className="font-semibold" style={{ color: COLORS.text }}>
+                        {item.nombre}
+                      </p>
+                      <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
+                        {item.key_interest.slice(0, 2).join(" | ")}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onRemove(item.id)}
+                      className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <input
               required
               value={form.organization}
               onChange={(e) =>
                 setForm({ ...form, organization: e.target.value })
               }
-              placeholder="Institución / empresa"
-              className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+              placeholder="Empresa / institución"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-300"
             />
 
             <input
@@ -1279,7 +1356,17 @@ function PrioritySelectionForm({ researchers }) {
                 setForm({ ...form, contact_name: e.target.value })
               }
               placeholder="Nombre de contacto"
-              className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-300"
+            />
+
+            <input
+              required
+              value={form.contact_role}
+              onChange={(e) =>
+                setForm({ ...form, contact_role: e.target.value })
+              }
+              placeholder="Cargo / área"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-300"
             />
 
             <input
@@ -1290,108 +1377,51 @@ function PrioritySelectionForm({ researchers }) {
                 setForm({ ...form, contact_email: e.target.value })
               }
               placeholder="Correo"
-              className="rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-300"
             />
           </div>
 
           <textarea
+            required
             value={form.comment}
             onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                placeholder="Comentario general sobre necesidades, áreas de interés o criterios de priorización"
-            className="min-h-24 rounded-2xl border border-white/20 bg-white px-4 py-3 text-slate-900 outline-none"
+            placeholder="Mensaje de necesidad o interés"
+            className="min-h-28 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-300"
           />
-
-          <div className="max-h-[520px] overflow-auto pr-2">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredResearchers.map((item) => {
-                const checked = selectedIds.includes(item.id);
-
-                return (
-                  <label
-                    key={item.id}
-                    className={`flex cursor-pointer items-start gap-4 rounded-2xl p-4 transition ${
-                      checked
-                        ? "bg-white text-slate-900"
-                        : "bg-white/10 hover:bg-white/20"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleSelection(item.id)}
-                      className="mt-1 h-5 w-5 rounded border-white/30"
-                    />
-
-                    <div>
-                      <p
-                        className={
-                          checked
-                            ? "font-semibold text-slate-900"
-                            : "font-semibold text-white"
-                        }
-                      >
-                        {item.nombre}
-                      </p>
-
-                      <p
-                        className={
-                          checked
-                            ? "mt-1 text-sm text-slate-600"
-                            : "mt-1 text-sm text-blue-100"
-                        }
-                      >
-                        {item.key_interest.slice(0, 2).join(" | ")}
-                      </p>
-
-                      <p
-                        className={
-                          checked
-                            ? "mt-2 text-xs text-slate-500"
-                            : "mt-2 text-xs text-blue-100"
-                        }
-                      >
-                        {item.ods_label.join(", ")}
-                      </p>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
 
           <button
             type="submit"
-            disabled={status === "saving" || status === "success"}
-            className="w-fit rounded-full bg-white px-6 py-3 text-sm font-semibold disabled:opacity-70"
-            style={{ color: COLORS.primary }}
+            disabled={status === "saving" || status === "success" || selectedResearchers.length === 0}
+            className="w-fit rounded-full px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+            style={{ backgroundColor: COLORS.primary }}
           >
             {status === "saving"
               ? "Enviando..."
               : status === "success"
-                ? "Encuesta enviada"
-                : "Enviar encuesta de interés"}
+                ? "Solicitud enviada"
+                : "Enviar solicitud del carrito"}
           </button>
 
           {status === "config-error" && (
-            <p className="text-sm text-red-200">
-              Faltan las variables de Supabase en Vercel.
+            <p className="text-sm text-amber-700">
+              En esta prueba local falta configurar Supabase para guardar la solicitud.
             </p>
           )}
 
           {status === "error" && (
-            <p className="text-sm text-red-200">
-              No se pudo guardar la selección. Revise Supabase.
+            <p className="text-sm text-red-600">
+              No pudimos registrar la solicitud en este momento. Intente nuevamente o contacte al equipo de la plataforma.
             </p>
           )}
 
           {status === "success" && (
-            <p className="text-sm font-medium text-emerald-200">
-              Encuesta de interés guardada correctamente.
+            <p className="text-sm font-medium text-emerald-700">
+              Solicitud del carrito registrada correctamente.
             </p>
           )}
         </div>
       </form>
-    </footer>
+    </div>
   );
 }
 
@@ -1425,8 +1455,8 @@ function IntroLanding({ onEnter }) {
 
               <p className="mt-6 max-w-3xl text-lg leading-8 text-blue-50 md:text-xl">
                 Plataforma interactiva para explorar investigadores, revisar capacidades
-                aplicadas a salud y registrar dos tipos de interés: una priorización general
-                de varios perfiles o una solicitud directa para un investigador específico.
+                aplicadas a salud y guardar perfiles de interés en un carrito antes de enviar
+                una solicitud institucional.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -1503,7 +1533,7 @@ function IntroLanding({ onEnter }) {
                       </p>
                       <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
                         Revise 84 tecnologías, abra perfiles para ver detalle y perfil PURE,
-                        y al final registre los investigadores de interés en la encuesta.
+                        y añada al carrito los investigadores que desea considerar.
                       </p>
                     </div>
                   </div>
@@ -1514,8 +1544,8 @@ function IntroLanding({ onEnter }) {
                     Colaboración directa
                   </p>
                   <p className="mt-2 text-sm leading-6" style={{ color: COLORS.muted }}>
-                    Si un perfil encaja con una necesidad específica, puede solicitar una
-                    colaboración directa desde la ficha del investigador.
+                    Si desea trabajar con una persona específica, mantenga la solicitud directa
+                    dentro de la ficha del investigador.
                   </p>
                 </div>
               </div>
@@ -1556,9 +1586,8 @@ function IntroLanding({ onEnter }) {
               3. Registrar interés
             </h2>
             <p className="mt-3 leading-7" style={{ color: COLORS.muted }}>
-              Al final del catálogo encontrará una encuesta para registrar investigadores
-              según su área y necesidad. Si desea trabajar directamente
-              con una persona, use la solicitud directa dentro de su perfil.
+              Añada perfiles al carrito mientras navega. Al finalizar, revise la selección,
+              quite o mantenga investigadores y envíe la solicitud institucional.
             </p>
           </div>
         </div>
@@ -1573,6 +1602,8 @@ export default function App() {
   const [selectedKeyInterest, setSelectedKeyInterest] = useState("Todas");
   const [selectedResearcher, setSelectedResearcher] = useState(null);
   const [interestResearcher, setInterestResearcher] = useState(null);
+  const [cartIds, setCartIds] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
   const [query, setQuery] = useState("");
 
 const availableKeyInterests = useMemo(() => {
@@ -1631,13 +1662,50 @@ const handleOpenResearcher = (researcher) => {
   }, 0);
 };
 
+const toggleCart = (id) => {
+  setCartIds((current) =>
+    current.includes(id)
+      ? current.filter((itemId) => itemId !== id)
+      : [...current, id]
+  );
+};
+
+const removeFromCart = (id) => {
+  setCartIds((current) => current.filter((itemId) => itemId !== id));
+};
+
+const clearCart = () => {
+  setCartIds([]);
+};
+
 if (showIntro) {
   return <IntroLanding onEnter={handleEnterPlatform} />;
 }
 
 
   if (selectedResearcher) {
-    return <main style={{ backgroundColor: COLORS.bg, minHeight: "100vh" }}><Profile selected={selectedResearcher} onBack={() => setSelectedResearcher(null)} onCollaborate={setInterestResearcher} /><InterestModal researcher={interestResearcher} onClose={() => setInterestResearcher(null)} /></main>;
+    return (
+      <main style={{ backgroundColor: COLORS.bg, minHeight: "100vh" }}>
+        <Profile
+          selected={selectedResearcher}
+          onBack={() => setSelectedResearcher(null)}
+          onCollaborate={setInterestResearcher}
+          inCart={cartIds.includes(selectedResearcher.id)}
+          onToggleCart={toggleCart}
+          onOpenCart={() => setCartOpen(true)}
+        />
+        <CartFloatingButton count={cartIds.length} onOpen={() => setCartOpen(true)} />
+        <CartCheckout
+          open={cartOpen}
+          researchers={researchers}
+          cartIds={cartIds}
+          onClose={() => setCartOpen(false)}
+          onRemove={removeFromCart}
+          onClear={clearCart}
+        />
+        <InterestModal researcher={interestResearcher} onClose={() => setInterestResearcher(null)} />
+      </main>
+    );
   }
 
   return (
@@ -1649,9 +1717,9 @@ if (showIntro) {
             <p className="inline-flex items-center gap-2 text-sm font-medium" style={{ color: COLORS.primary }}><Filter size={16} /> Catálogo de capacidades</p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight" style={{ color: COLORS.text }}>Investigadores pertinentes para colaboración en salud</h2>
             <p className="mt-3 max-w-3xl" style={{ color: COLORS.muted }}>
-              Primero explore y compare perfiles usando búsqueda y filtros. Luego puede abrir una ficha
-              para revisar detalles, entrar al perfil PURE o pedir una colaboración directa; al final
-              encontrará la encuesta para registrar investigadores de interés.
+              Primero explore y compare perfiles usando búsqueda y filtros. Luego puede abrir una ficha,
+              revisar detalles, entrar al perfil PURE, pedir una colaboración directa o añadir perfiles
+              al carrito para una solicitud institucional.
             </p>
           </div>
           <div className="relative w-full md:w-96">
@@ -1670,7 +1738,7 @@ if (showIntro) {
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <p className="text-sm font-semibold" style={{ color: COLORS.text }}>Para registrar interés</p>
             <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>
-              Solicitud directa: un investigador específico. Encuesta final: perfiles prioritarios.
+              Carrito: varios perfiles de interés. Solicitud directa: un investigador específico.
             </p>
           </div>
         </div>
@@ -1704,10 +1772,28 @@ if (showIntro) {
         </div>
 
         <div className="mt-6 text-sm" style={{ color: COLORS.muted }}>{filteredResearchers.length} perfiles encontrados</div>
-        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{filteredResearchers.map((item) => <CatalogCard key={item.id} item={item} onOpen={handleOpenResearcher} />)}</div>
+        <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredResearchers.map((item) => (
+            <CatalogCard
+              key={item.id}
+              item={item}
+              onOpen={handleOpenResearcher}
+              inCart={cartIds.includes(item.id)}
+              onToggleCart={toggleCart}
+            />
+          ))}
+        </div>
         {filteredResearchers.length === 0 && <div className="mt-8 rounded-3xl bg-white p-10 text-center ring-1 ring-slate-200"><p className="text-lg font-medium" style={{ color: COLORS.text }}>No se encontraron perfiles con esos filtros.</p><p className="mt-2" style={{ color: COLORS.muted }}>Pruebe con otro ODS, tecnología o palabra clave.</p></div>}
       </section>
-<PrioritySelectionForm researchers={researchers} />
+      <CartFloatingButton count={cartIds.length} onOpen={() => setCartOpen(true)} />
+      <CartCheckout
+        open={cartOpen}
+        researchers={researchers}
+        cartIds={cartIds}
+        onClose={() => setCartOpen(false)}
+        onRemove={removeFromCart}
+        onClear={clearCart}
+      />
     </main>
   );
 }
